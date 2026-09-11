@@ -1,3 +1,5 @@
+import Header from "@/components/shop/layout/Heder";
+
 export default function ShopLayout({
     children,
   }: {
@@ -5,6 +7,7 @@ export default function ShopLayout({
   }) {
     return (
       <div className="min-h-screen bg-slate-50">
+           <Header/>
         {children}
       </div>
     );
