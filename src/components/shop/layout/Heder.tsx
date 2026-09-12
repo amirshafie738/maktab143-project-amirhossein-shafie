@@ -1,14 +1,7 @@
 "use client";
-
 import Link from "next/link";
 import { useState } from "react";
-import {
-  FiMenu,
-  FiSearch,
-  FiShoppingBag,
-  FiUser,
-  FiX,
-} from "react-icons/fi";
+import { FiMenu, FiSearch, FiShoppingBag, FiUser, FiX } from "react-icons/fi";
 
 const menuItems = [
   {
@@ -43,29 +36,31 @@ export default function Heder() {
   return (
     <>
       <header className="w-full bg-white">
-        <div className="mx-auto flex h-[80px] max-w-[1440px] items-center px-6">
-          
-          {/* لوگو */}
+        <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-4 lg:h-[80px] lg:px-6">
+          {/* ================= MOBILE MENU ================= */}
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(true)}
+            className="flex items-center justify-center text-[#292929] transition hover:text-[#7d2945] lg:hidden"
+          >
+            <FiMenu size={24} />
+          </button>
+
+          {/* ================= LOGO ================= */}
           <Link
             href="/"
-            className="flex shrink-0 items-center gap-2"
+            className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#7d2945]">
-              <span className="text-xl text-white">☾</span>
-            </div>
-
-            <div className="flex flex-col items-center leading-none">
-              <span className="text-[22px] font-bold text-[#292929]">
-               تست
-              </span>
-
-              <span className="mt-1 text-[7px] tracking-[3px] text-gray-400">
-                amir
-              </span>
+            <div className="h-[48px] w-[95px] lg:h-[70px] lg:w-[130px]">
+              <img
+                src="/images/brand/elvia-logo.png"
+                alt="ELVIA"
+                className="h-full w-full object-contain"
+              />
             </div>
           </Link>
 
-          {/* منو */}
+          {/* ================= DESKTOP MENU ================= */}
           <nav className="mr-8 hidden items-center gap-7 lg:flex">
             {menuItems.map((item) => (
               <Link
@@ -78,18 +73,15 @@ export default function Heder() {
             ))}
           </nav>
 
-          {/* سرچ */}
-          <div className="mx-auto hidden w-full max-w-[550px] md:block">
-            <div className="flex h-[54px] items-center rounded-full border border-[#e5e1dd] bg-[#faf9f7] px-5">
-              <FiSearch
-                size={21}
-                className="shrink-0 text-[#777]"
-              />
+          {/* ================= DESKTOP SEARCH ================= */}
+          <div className="mx-auto hidden w-full max-w-96 md:block lg:block">
+            <div className="flex h-14 items-center rounded-full border border-[#e5e1dd] bg-[#faf9f7] px-5">
+              <FiSearch size={21} className="shrink-0 text-[#777]" />
 
               <input
                 type="text"
                 placeholder="جستجوی محصول، برند یا نیاز پوستی"
-                className="mr-3 w-full bg-transparent text-right text-sm text-gray-700 outline-none placeholder:text-[#8b8580]"
+                className="mr-3  w-full bg-transparent text-right text-sm text-gray-700 outline-none placeholder:text-[#8b8580]"
               />
 
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white text-xs text-gray-400 shadow-sm">
@@ -98,40 +90,41 @@ export default function Heder() {
             </div>
           </div>
 
-          {/* آیکون‌ها */}
-          <div className="mr-6 flex shrink-0 items-center gap-6">
-            
+          {/* ================= ICONS ================= */}
+          <div className="flex shrink-0 items-center gap-5 lg:mr-6 lg:gap-6">
+            {/* Search */}
             <button
               type="button"
               className="text-[#292929] transition hover:text-[#7d2945]"
             >
-              <FiSearch size={24} />
+              <FiSearch size={23} />
             </button>
 
+            {/* User */}
             <Link
               href="/admin/login"
               className="text-[#292929] transition hover:text-[#7d2945]"
             >
-              <FiUser size={24} />
+              <FiUser size={23} />
             </Link>
 
-            {/* سبد خرید */}
+            {/* Cart */}
             <Link
               href="/cart"
               className="relative text-[#292929] transition hover:text-[#7d2945]"
             >
-              <FiShoppingBag size={24} />
+              <FiShoppingBag size={23} />
 
               <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#7d2945] px-1 text-[10px] font-bold text-white">
                 0
               </span>
             </Link>
 
-            {/* دکمه منو */}
+            {/* Desktop Menu */}
             <button
               type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="text-[#292929] transition hover:text-[#7d2945]"
+              className="hidden text-[#292929] transition hover:text-[#7d2945] lg:block"
             >
               <FiMenu size={25} />
             </button>
@@ -150,14 +143,11 @@ export default function Heder() {
       {/* Drawer */}
       <aside
         className={`fixed right-0 top-0 z-50 h-screen w-[450px] max-w-[90vw] bg-[#fffdf9] transition-transform duration-300 ${
-          isMenuOpen
-            ? "translate-x-0"
-            : "translate-x-full"
+          isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header Drawer */}
         <div className="flex items-center justify-between border-b border-[#eee9e3] px-7 py-6">
-          
           {/* بستن */}
           <button
             type="button"
@@ -170,21 +160,15 @@ export default function Heder() {
           {/* لوگو */}
           <Link
             href="/"
+            className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0"
             onClick={() => setIsMenuOpen(false)}
-            className="flex items-center gap-2"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#7d2945]">
-              <span className="text-lg text-white">☾</span>
-            </div>
-
-            <div className="flex flex-col items-center leading-none">
-              <span className="text-xl font-bold">
-                تست
-              </span>
-
-              <span className="mt-1 text-[6px] tracking-[3px] text-gray-400">
-                amir
-              </span>
+            <div className="h-[48px] w-[95px] lg:h-[70px] lg:w-[130px]">
+              <img
+                src="/images/brand/elvia-logo.png"
+                alt="ELVIA"
+                className="h-full w-full object-contain"
+              />
             </div>
           </Link>
         </div>
