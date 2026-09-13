@@ -1,8 +1,8 @@
-export default function ResultDeny() {
+export default function Payment() {
     return (
       <main className="min-h-screen">
         <section className="mx-auto max-w-7xl px-6 py-12">
-          <h1 className="text-3xl font-bold text-slate-900"> ResultDeny </h1>
+          <h1 className="text-3xl font-bold text-slate-900"> Payment </h1>
         </section>
       </main>
     );
