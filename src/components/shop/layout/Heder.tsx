@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiMenu, FiSearch, FiShoppingBag, FiUser, FiX } from "react-icons/fi";
 
 const menuItems = [
@@ -32,6 +32,13 @@ const menuItems = [
 
 export default function Heder() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+useEffect(() => {
+  const token = localStorage.getItem("accessToken");
+
+  setIsLoggedIn(!!token);
+}, []);
 
   return (
     <>
@@ -102,7 +109,7 @@ export default function Heder() {
 
             {/* User */}
             <Link
-              href="/admin/login"
+              href={isLoggedIn ? "/admin" : "/admin/login"}
               className="text-[#292929] transition hover:text-[#7d2945]"
             >
               <FiUser size={23} />

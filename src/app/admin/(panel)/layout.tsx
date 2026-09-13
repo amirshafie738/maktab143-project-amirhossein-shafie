@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import AdminHeader from "@/components/admin/layout/AdminHeader";
 import AdminSidebar from "@/components/admin/layout/AdminSidebar";
 
@@ -6,14 +11,24 @@ export default function AdminPanelLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      router.replace("/admin/login");
+    }
+  }, [router]);
+
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-50">
       <AdminHeader />
 
       <div className="flex">
         <AdminSidebar />
 
-        <main className="min-w-0 flex-1 p-6">
+        <main className="flex-1 p-6">
           {children}
         </main>
       </div>
