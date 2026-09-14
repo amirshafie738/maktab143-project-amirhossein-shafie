@@ -3,7 +3,12 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+import QueryProvider from "@/providers/QueryProvider";
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "فروشگاه اینترنتی",
@@ -16,8 +21,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className={cn("font-sans", geist.variable)}>
-      <body>{children}</body>
+    <html
+      lang="fa"
+      dir="rtl"
+      className={cn("font-sans", geist.variable)}
+    >
+      <body>
+        <QueryProvider>
+          {children}
+        </QueryProvider>
+      </body>
     </html>
   );
 }
