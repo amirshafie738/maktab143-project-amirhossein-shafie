@@ -39,12 +39,12 @@ export default function ProductTable({ products }: ProductTableProps) {
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 overflow-hidden rounded-lg bg-slate-100">
                     <img
-                      src={product.thumbnail}
+                      src={`http://localhost:3001${product.thumbnail}`}
+
                       alt={product.name}
                       className="h-full w-full object-cover"
                     />
                   </div>
-
                   <span className="font-medium text-slate-700">
                     {product.name}
                   </span>

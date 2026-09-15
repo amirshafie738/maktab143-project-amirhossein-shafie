@@ -1,8 +1,29 @@
 import { api } from "./axios";
 import type { Product } from "@/types/product";
 
-export async function getProducts(): Promise<Product[]> {
-  const response = await api.get<Product[]>("/products");
+type GetProductsParams = {
+  page?: number;
+  limit?: number;
+};
 
-  return response.data;
+type ProductsResponse = {
+  data: Product[];
+  total: number;
+};
+
+export async function getProducts({
+  page = 1,
+  limit = 5,
+}: GetProductsParams = {}): Promise<ProductsResponse> {
+  const response = await api.get<Product[]>("/products", {
+    params: {
+      _page: page,
+      _limit: limit,
+    },
+  });
+
+  return {
+    data: response.data,
+    total: Number(response.headers["x-total-count"]),
+  };
 }

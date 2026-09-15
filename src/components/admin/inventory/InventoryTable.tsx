@@ -53,7 +53,7 @@ export default function InventoryTable({
               </td>
 
               <td className="px-4 py-4">
-                {product.quantity.toLocaleString("fa-IR")}
+              {product.quantity?.toLocaleString("fa-IR") ?? "0"}
               </td>
 
               <td className="px-4 py-4">
