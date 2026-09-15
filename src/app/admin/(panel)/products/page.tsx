@@ -5,17 +5,48 @@ import { useQuery } from "@tanstack/react-query";
 
 import ProductTable from "@/components/admin/products/ProductTable";
 import Pagination from "@/components/admin/products/Pagination";
+import ProductFilter from "@/components/admin/products/ProductFilter";
+
 import { getProducts } from "@/api/product";
+import { getCategories } from "./categoty";
+
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
+  const [category, setCategory] = useState("");
 
   const limit = 5;
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["products", page],
-    queryFn: () => getProducts({ page, limit }),
+  // دریافت دسته‌بندی‌ها
+  const {
+    data: categories = [],
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
   });
+
+  // دریافت محصولات
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["products", page, category],
+    queryFn: () =>
+      getProducts({
+        page,
+        limit,
+        category,
+      }),
+  });
+
+  const handleCategoryChange = (value: string) => {
+    setCategory(value);
+
+    // وقتی فیلتر عوض شد،
+    // برمی‌گردیم صفحه اول
+    setPage(1);
+  };
 
   if (isLoading) {
     return (
@@ -56,6 +87,13 @@ export default function ProductsPage() {
           لیست محصولات فروشگاه
         </p>
       </div>
+
+      {/* فیلتر */}
+      <ProductFilter
+        category={category}
+        categories={categories}
+        onCategoryChange={handleCategoryChange}
+      />
 
       {/* جدول */}
       <ProductTable products={products} />
