@@ -43,7 +43,7 @@ useEffect(() => {
   return (
     <>
       <header className="w-full bg-white">
-        <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-4 lg:h-[80px] lg:px-6">
+        <div className="mx-auto flex h-19 max-w-8xl items-center justify-between px-4 lg:h-20 lg:px-6">
           {/* ================= MOBILE MENU ================= */}
           <button
             type="button"
@@ -58,7 +58,7 @@ useEffect(() => {
             href="/"
             className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0"
           >
-            <div className="h-[48px] w-[95px] lg:h-[70px] lg:w-[130px]">
+            <div className="h-12 w-24 lg:h-18 lg:w-32">
               <img
                 src="/images/brand/elvia-logo.png"
                 alt="ELVIA"
@@ -149,7 +149,7 @@ useEffect(() => {
 
       {/* Drawer */}
       <aside
-        className={`fixed right-0 top-0 z-50 h-screen w-[450px] max-w-[90vw] bg-[#fffdf9] transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-50 h-screen w-md max-w-[90vw] bg-[#fffdf9] transition-transform duration-300 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -170,7 +170,7 @@ useEffect(() => {
             className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0"
             onClick={() => setIsMenuOpen(false)}
           >
-            <div className="h-[48px] w-[95px] lg:h-[70px] lg:w-[130px]">
+            <div className="h-12 w-24 lg:h-18 lg:w-32">
               <img
                 src="/images/brand/elvia-logo.png"
                 alt="ELVIA"
@@ -187,7 +187,7 @@ useEffect(() => {
               key={item.title}
               href={item.href}
               onClick={() => setIsMenuOpen(false)}
-              className="flex h-[66px] items-center justify-start border-b border-[#eee9e3] text-[16px] font-semibold text-[#292929] transition hover:text-[#7d2945]"
+              className="flex h-16 items-center justify-start border-b border-[#eee9e3] text-[16px] font-semibold text-[#292929] transition hover:text-[#7d2945]"
             >
               {item.title}
             </Link>
@@ -199,7 +199,7 @@ useEffect(() => {
           <Link
             href="/admin/login"
             onClick={() => setIsMenuOpen(false)}
-            className="flex h-[58px] items-center justify-center rounded-full border border-[#cfc5bd] text-[16px] font-bold text-[#292929] transition hover:bg-[#7d2945] hover:text-white"
+            className="flex h-14 items-center justify-center rounded-full border border-[#cfc5bd] text-[16px] font-bold text-[#292929] transition hover:bg-[#7d2945] hover:text-white"
           >
             ورود به حساب کاربری
           </Link>

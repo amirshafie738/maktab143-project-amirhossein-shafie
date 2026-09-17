@@ -4,7 +4,7 @@ import { FiChevronDown, FiFilter, FiSearch } from "react-icons/fi";
 
 export default function CategorySidebar() {
   return (
-    <aside className="w-full shrink-0 rounded-2xl border border-[#eadfd9] bg-white p-4 lg:w-[245px]">
+    <aside className="w-full shrink-0 rounded-2xl border border-[#eadfd9] bg-white p-4 lg:w-60">
       {/* عنوان فیلتر */}
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-base font-bold text-[#292929]">فیلترها</h2>
