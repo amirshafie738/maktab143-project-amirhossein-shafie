@@ -8,7 +8,7 @@ import Pagination from "@/components/admin/Pagination/Pagination";
 import ProductFilter from "@/components/admin/products/ProductFilter";
 
 import { getProducts } from "@/api/product";
-import { getCategories } from "./categoty";
+import { getCategories } from "../../../../api/categoty";
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
@@ -68,6 +68,15 @@ export default function ProductsPage() {
         <h1 className="text-2xl font-bold text-slate-800">محصولات</h1>
 
         <p className="mt-1 text-sm text-slate-500">لیست محصولات فروشگاه</p>
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-600 hover:shadow-md active:scale-95 cursor-pointer"
+          >
+            <span className="text-lg leading-none">+</span>
+            <span>افزودن کالا</span>
+          </button>
+        </div>
       </div>
 
       {/* فیلتر */}

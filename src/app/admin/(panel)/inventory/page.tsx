@@ -50,6 +50,14 @@ export default function InventoryPage() {
         <p className="mt-1 text-sm text-slate-500">
           مدیریت قیمت و موجودی محصولات
         </p>
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-700 hover:shadow-md active:scale-95 cursor-pointer"
+          >
+            ذخیره
+          </button>
+        </div>
       </div>
 
       <InventoryTable products={products} />

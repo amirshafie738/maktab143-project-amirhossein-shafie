@@ -1,13 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Vazirmatn } from "next/font/google";
 import { cn } from "@/lib/utils";
 
 import QueryProvider from "@/providers/QueryProvider";
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-sans",
+const vazirmatn = Vazirmatn({
+  subsets: ["arabic"],
 });
 
 export const metadata: Metadata = {
@@ -21,15 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="fa"
-      dir="rtl"
-      className={cn("font-sans", geist.variable)}
-    >
-      <body>
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+    <html lang="fa" dir="rtl">
+      <body className={vazirmatn.className}>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
