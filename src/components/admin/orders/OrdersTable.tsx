@@ -1,44 +1,58 @@
 import type { Order } from "@/types/order";
+import { FiArrowDown, FiArrowUp } from "react-icons/fi";
 
 type OrdersTableProps = {
   orders: Order[];
+  sortOrder: "asc" | "desc";
+  onSort: () => void;
 };
 
 export default function OrdersTable({
   orders,
+  sortOrder,
+  onSort,
 }: OrdersTableProps) {
+  const formatDate = (date: number) => {
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(date));
+  };
+
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
       <table className="w-full min-w-[1000px] text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
-            <th className="px-4 py-4 text-right font-semibold">
-              #
-            </th>
+            <th className="px-4 py-4 text-right font-semibold">#</th>
+
+            <th className="px-4 py-4 text-right font-semibold">مشتری</th>
+
+            <th className="px-4 py-4 text-right font-semibold">شماره تماس</th>
+
+            <th className="px-4 py-4 text-right font-semibold">مبلغ کل</th>
+            {/* مرتب‌سازی تاریخ */}
 
             <th className="px-4 py-4 text-right font-semibold">
-              مشتری
+              <button
+                type="button"
+                onClick={onSort}
+                className="inline-flex cursor-pointer items-center gap-1"
+              >
+                <span>تاریخ ثبت سفارش</span>
+
+                {sortOrder === "desc" ? (
+                  <FiArrowDown size={16} />
+                ) : (
+                  <FiArrowUp size={16} />
+                )}
+              </button>
             </th>
 
-            <th className="px-4 py-4 text-right font-semibold">
-              شماره تماس
-            </th>
+            <th className="px-4 py-4 text-right font-semibold">وضعیت</th>
 
-            <th className="px-4 py-4 text-right font-semibold">
-              مبلغ کل
-            </th>
-
-            <th className="px-4 py-4 text-right font-semibold">
-              تعداد محصولات
-            </th>
-
-            <th className="px-4 py-4 text-right font-semibold">
-              وضعیت
-            </th>
-
-            <th className="px-4 py-4 text-right font-semibold">
-              عملیات
-            </th>
+            <th className="px-4 py-4 text-right font-semibold">عملیات</th>
           </tr>
         </thead>
 
@@ -48,36 +62,30 @@ export default function OrdersTable({
               key={order.id}
               className="border-b border-slate-100 last:border-none"
             >
-              <td className="px-4 py-4">
-                {index + 1}
-              </td>
+              <td className="px-4 py-4">{(index + 1).toLocaleString("fa-IR")}</td>
 
               <td className="px-4 py-4 font-medium text-slate-700">
                 {order.username} {order.lastname}
               </td>
 
-              <td className="px-4 py-4 text-slate-600">
-                {order.phone}
-              </td>
+              <td className="px-4 py-4 text-slate-600">{order.phone}</td>
 
               <td className="px-4 py-4">
                 {order.prices.toLocaleString("fa-IR")} تومان
               </td>
 
-              <td className="px-4 py-4">
-                {order.products.length}
+              <td className="px-4 py-4 text-slate-600">
+                {formatDate(order.createdAt)}
               </td>
 
               <td className="px-4 py-4">
-                {order.delivered === "true" ? (
-                  <span className="text-green-600">
-                    تحویل داده شده
-                  </span>
-                ) : (
-                  <span className="text-orange-500">
-                    در انتظار تحویل
-                  </span>
-                )}
+                <span
+                  className={
+                    order.delivered ? "text-emerald-600" : "text-red-400"
+                  }
+                >
+                  {order.delivered ? "تحویل شده" : "تحویل نشده"}
+                </span>
               </td>
 
               <td className="px-4 py-4">
