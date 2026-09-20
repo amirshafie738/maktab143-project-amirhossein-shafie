@@ -32,7 +32,7 @@ export default function ProductTable({ products }: ProductTableProps) {
               className="border-b border-slate-100 last:border-none"
             >
               {/* شماره */}
-              <td className="px-4 py-4">{index + 1}</td>
+              <td className="px-4 py-4">{(index + 1).toLocaleString("fa-IR")}</td>
 
               {/* محصول */}
               <td className="px-4 py-4">
@@ -66,7 +66,7 @@ export default function ProductTable({ products }: ProductTableProps) {
                     product.quantity > 0 ? "text-green-600" : "text-red-500"
                   }
                 >
-                  {product.quantity}
+                  {(product.quantity).toLocaleString("fa-IR")}
                 </span>
               </td>
 

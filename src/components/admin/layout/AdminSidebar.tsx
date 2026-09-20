@@ -40,12 +40,25 @@ type AdminSidebarProps = {
   onClose: () => void;
 };
 
-export default function AdminSidebar({
-  isOpen,
-  onClose,
-}: AdminSidebarProps) {
+export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
+  // خروج از حساب کاربری
 
+  const handleLogout = () => {
+    // پاک کردن LocalStorage
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    // پاک کردن Cookie
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+    document.cookie =
+      "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+    // انتقال به صفحه لاگین
+    window.location.href = "/admin/login";
+  };
   return (
     <>
       {/* Overlay - فقط موبایل */}
@@ -62,11 +75,7 @@ export default function AdminSidebar({
           border-l bg-white
           transition-transform duration-300
           lg:static lg:z-auto lg:block lg:translate-x-0
-          ${
-            isOpen
-              ? "translate-x-0"
-              : "translate-x-full"
-          }
+          ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* دکمه بستن موبایل */}
@@ -88,9 +97,7 @@ export default function AdminSidebar({
             <span>بازگشت به سایت</span>
           </Link>
 
-          <div className="mb-8 text-xl font-bold text-slate-900">
-            فروشگاه
-          </div>
+          <div className="mb-8 text-xl font-bold text-slate-900">فروشگاه</div>
 
           <nav className="space-y-2">
             {menuItems.map((item) => {
@@ -120,14 +127,14 @@ export default function AdminSidebar({
           </nav>
 
           <div className="mt-10 border-t pt-5">
-            <Link
-              href="/admin/login"
-              onClick={onClose}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-500 hover:bg-red-50"
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-500 hover:bg-red-50"
             >
               <FiLogOut size={20} />
               <span>خروج</span>
-            </Link>
+            </button>
           </div>
         </div>
       </aside>

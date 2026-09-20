@@ -26,17 +26,20 @@ export default function AdminLoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await login(data);
-
+  
       localStorage.setItem(
         "accessToken",
         response.accessToken
       );
-
+  
       localStorage.setItem(
         "refreshToken",
         response.refreshToken
       );
-
+  
+      document.cookie = `accessToken=${response.accessToken}; path=/`;
+      document.cookie = `refreshToken=${response.refreshToken}; path=/`;
+  
       router.push("/admin");
     } catch (error) {
       console.error("Login failed:", error);
