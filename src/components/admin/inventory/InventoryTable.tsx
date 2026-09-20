@@ -41,7 +41,7 @@ export default function InventoryTable({
               className="border-b border-slate-100 last:border-none"
             >
               <td className="px-4 py-4">
-                {index + 1}
+              {(index + 1).toLocaleString("fa-IR")}
               </td>
 
               <td className="px-4 py-4 font-medium text-slate-700">
