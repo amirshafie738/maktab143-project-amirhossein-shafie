@@ -179,12 +179,10 @@ export default function ProductsPage() {
       </div>
     );
   }
-
+// گرفتن دیتا و گرفتن تعداد کل صفحه
   const products = data?.data ?? [];
 
   const totalPages = Math.ceil((data?.total ?? 0) / limit);
-
-  const isSaving = createMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="p-4 sm:p-6">

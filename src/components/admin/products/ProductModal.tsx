@@ -1,13 +1,9 @@
 "use client";
 
 import { useState } from "react";
-
 import type { Product } from "@/types/product";
-
 import { uploadProductImage, type ProductFormData } from "@/api/product";
-
 import type { ProductFormValues } from "@/schemas/productSchema";
-
 import ProductForm from "./ProductForm";
 
 type ProductModalProps = {
@@ -95,13 +91,10 @@ export default function ProductModal({
           onClose={onClose}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
+          ImageError={error}
         />
 
-        {/* Error */}
-
-        {error && (
-          <p className="mt-3 text-center text-sm text-red-500">{error}</p>
-        )}
+       
       </div>
     </div>
   );

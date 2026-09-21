@@ -1,19 +1,15 @@
 "use client";
 
 import { useState } from "react";
-
 import { Controller, useForm } from "react-hook-form";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import type { Product } from "@/types/product";
-
 import { productSchema, type ProductFormValues } from "@/schemas/productSchema";
-
-import { categories, subcategories } from "@/constants/productOptions";
-
+import { subcategories } from "@/constants/productOptions";
 import RichTextEditor from "./RichTextEditor";
 import ProductImageUpload from "./ProductImageUpload";
+import { useQuery } from "@tanstack/react-query";
+import { getCategories } from "@/api/categoty";
 
 type ProductFormProps = {
   product?: Product | null;
@@ -22,6 +18,7 @@ type ProductFormProps = {
   onSubmit: (data: ProductFormValues, imageFile: File | null) => Promise<void>;
 
   isSubmitting?: boolean;
+  ImageError: string;
 };
 
 export default function ProductForm({
@@ -29,6 +26,7 @@ export default function ProductForm({
   onClose,
   onSubmit,
   isSubmitting = false,
+  ImageError,
 }: ProductFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -61,7 +59,10 @@ export default function ProductForm({
   const submitHandler = async (data: ProductFormValues) => {
     await onSubmit(data, imageFile);
   };
-
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
   return (
     <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
       {/* نام */}
@@ -217,7 +218,11 @@ export default function ProductForm({
         onImageChange={setImageFile}
         disabled={isSubmitting}
       />
+      {/* Error */}
 
+      {ImageError && (
+        <p className=" text-sm text-red-500">{ImageError}</p>
+      )}
       {/* توضیحات */}
 
       <div>
