@@ -1,13 +1,13 @@
 import { api } from "./axios";
 import type { Product } from "@/types/product";
 
-type GetProductsParams = {
+export type GetProductsParams = {
   page?: number;
   limit?: number;
   category?: string;
 };
 
-type ProductsResponse = {
+export type ProductsResponse = {
   data: Product[];
   total: number;
 };
@@ -23,6 +23,7 @@ export type ProductFormData = {
   thumbnail: string;
 };
 
+// گرفتن لیست محصولات
 export async function getProducts({
   page = 1,
   limit = 5,
@@ -32,9 +33,7 @@ export async function getProducts({
     params: {
       _page: page,
       _limit: limit,
-      ...(category && {
-        category,
-      }),
+      ...(category && { category }),
     },
   });
 
@@ -44,29 +43,36 @@ export async function getProducts({
   };
 }
 
+// گرفتن یک محصول
 export async function getProduct(id: number): Promise<Product> {
   const response = await api.get<Product>(`/products/${id}`);
 
   return response.data;
 }
 
+// ساخت محصول
 export async function createProduct(data: ProductFormData): Promise<Product> {
   const response = await api.post<Product>("/products", data);
 
   return response.data;
 }
 
+// ویرایش محصول
 export async function updateProduct(
   id: number,
   data: ProductFormData
 ): Promise<Product> {
   const response = await api.put<Product>(`/products/${id}`, data);
+
   return response.data;
 }
+
+// حذف محصول
 export async function deleteProduct(id: number): Promise<void> {
   await api.delete(`/products/${id}`);
 }
 
+// آپلود تصویر
 export async function uploadProductImage(
   file: File
 ): Promise<{ path: string }> {
@@ -74,7 +80,10 @@ export async function uploadProductImage(
 
   formData.append("thumbnail", file);
 
-  const response = await api.post<{ path: string }>("/upload", formData);
+  const response = await api.post<{ path: string }>(
+    "/upload",
+    formData
+  );
 
   return response.data;
 }

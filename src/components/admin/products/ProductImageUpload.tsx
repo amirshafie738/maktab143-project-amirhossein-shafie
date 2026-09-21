@@ -14,11 +14,10 @@ export default function ProductImageUpload({
   disabled = false,
 }: ProductImageUploadProps) {
   const [preview, setPreview] = useState(initialImage);
+
   const [error, setError] = useState("");
 
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -28,22 +27,24 @@ export default function ProductImageUpload({
     // فقط JPEG
     if (file.type !== "image/jpeg") {
       setError("فرمت تصویر باید JPEG باشد.");
+
       event.target.value = "";
+      onImageChange(null);
+
       return;
     }
 
     // حداکثر 2MB
-    const maxSize = 2 * 1024 * 1024;
+    if (file.size > 2 * 1024 * 1024) {
+      setError("حجم تصویر نباید بیشتر از ۲ مگابایت باشد.");
 
-    if (file.size > maxSize) {
-      setError(
-        "حجم تصویر نباید بیشتر از ۲ مگابایت باشد."
-      );
       event.target.value = "";
+      onImageChange(null);
+
       return;
     }
 
-    // آزاد کردن preview قبلی
+    // حذف Blob قبلی
     if (preview.startsWith("blob:")) {
       URL.revokeObjectURL(preview);
     }
@@ -51,6 +52,7 @@ export default function ProductImageUpload({
     const objectUrl = URL.createObjectURL(file);
 
     setPreview(objectUrl);
+
     onImageChange(file);
   };
 
@@ -76,11 +78,7 @@ export default function ProductImageUpload({
         className="w-full rounded-lg border border-slate-300 p-3 disabled:cursor-not-allowed disabled:bg-slate-100"
       />
 
-      {error && (
-        <p className="mt-1 text-sm text-red-500">
-          {error}
-        </p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
 
       {preview && (
         <div className="mt-3 h-32 w-32 overflow-hidden rounded-xl border border-slate-200">

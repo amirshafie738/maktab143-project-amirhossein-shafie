@@ -4,20 +4,17 @@ import { useState } from "react";
 
 import type { Product } from "@/types/product";
 
-import {
-  uploadProductImage,
-  type ProductFormData,
-} from "@/api/product";
+import { uploadProductImage, type ProductFormData } from "@/api/product";
+
+import type { ProductFormValues } from "@/schemas/productSchema";
 
 import ProductForm from "./ProductForm";
-import ProductImageUpload from "./ProductImageUpload";
 
 type ProductModalProps = {
   product?: Product | null;
   onClose: () => void;
-  onSubmit: (
-    data: ProductFormData
-  ) => Promise<void>;
+
+  onSubmit: (data: ProductFormData) => Promise<void>;
 };
 
 export default function ProductModal({
@@ -25,57 +22,47 @@ export default function ProductModal({
   onClose,
   onSubmit,
 }: ProductModalProps) {
-  const [imageFile, setImageFile] =
-    useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
-
-  const [imageError, setImageError] =
-    useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (
-    data: ProductFormData
+    data: ProductFormValues,
+    imageFile: File | null
   ) => {
     try {
       setIsSubmitting(true);
-      setImageError("");
+      setError("");
 
-      let thumbnail =
-        product?.thumbnail ?? "";
+      // عکس قبلی در حالت ویرایش
+      let thumbnail = product?.thumbnail ?? "";
 
       // اگر عکس جدید انتخاب شده
       if (imageFile) {
-        const result =
-          await uploadProductImage(imageFile);
+        const result = await uploadProductImage(imageFile);
 
         thumbnail = result.path;
       }
 
       // محصول جدید باید عکس داشته باشد
       if (!thumbnail) {
-        setImageError(
-          "لطفاً تصویر محصول را انتخاب کنید."
-        );
+        setError("لطفاً تصویر محصول را انتخاب کنید.");
 
         return;
       }
 
-      await onSubmit({
+      const productData: ProductFormData = {
         ...data,
         thumbnail,
-      });
+      };
+
+      await onSubmit(productData);
 
       onClose();
     } catch (error) {
-      console.error(
-        "Product submit error:",
-        error
-      );
+      console.error("Product submit error:", error);
 
-      setImageError(
-        "ذخیره محصول با خطا مواجه شد."
-      );
+      setError("ذخیره محصول با خطا مواجه شد.");
     } finally {
       setIsSubmitting(false);
     }
@@ -84,14 +71,11 @@ export default function ProductModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-
         {/* Header */}
 
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-800">
-            {product
-              ? "ویرایش محصول"
-              : "افزودن محصول"}
+            {product ? "ویرایش محصول" : "افزودن محصول"}
           </h2>
 
           <button
@@ -104,41 +88,19 @@ export default function ProductModal({
           </button>
         </div>
 
-        {/* تصویر */}
-
-        <div className="mb-5">
-          <ProductImageUpload
-            initialImage={
-              product?.thumbnail ?? ""
-            }
-            onImageChange={(file) => {
-              setImageFile(file);
-              setImageError("");
-            }}
-            disabled={isSubmitting}
-          />
-
-          {imageError && (
-            <p className="mt-1 text-sm text-red-500">
-              {imageError}
-            </p>
-          )}
-        </div>
-
-        {/* فرم */}
+        {/* Form */}
 
         <ProductForm
           product={product}
           onClose={onClose}
           onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
         />
 
-        {/* Loading */}
+        {/* Error */}
 
-        {isSubmitting && (
-          <div className="mt-3 text-center text-sm text-slate-500">
-            در حال ذخیره محصول...
-          </div>
+        {error && (
+          <p className="mt-3 text-center text-sm text-red-500">{error}</p>
         )}
       </div>
     </div>
