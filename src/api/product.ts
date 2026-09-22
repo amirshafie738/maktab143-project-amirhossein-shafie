@@ -103,3 +103,18 @@ export async function uploadProductImages(
 
   return response.data;
 }
+// مخصوص قیمت ومجودی 
+export async function updateProductInventory(
+  id: number,
+  data: {
+    price: number;
+    quantity: number;
+  }
+): Promise<Product> {
+  const response = await api.patch<Product>(
+    `/products/${id}`,
+    data
+  );
+
+  return response.data;
+}

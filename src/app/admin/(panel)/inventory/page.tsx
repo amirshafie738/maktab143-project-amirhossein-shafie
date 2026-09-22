@@ -1,15 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import InventoryTable from "@/components/admin/inventory/InventoryTable";
 import Pagination from "@/components/admin/Pagination/Pagination";
 
-import { getProducts } from "@/api/product";
+import { getProducts, updateProductInventory } from "@/api/product";
 
 export default function InventoryPage() {
+  const queryClient = useQueryClient();
+
   const [page, setPage] = useState(1);
+  const [changes, setChanges] = useState<
+    {
+      id: number;
+      price: number;
+      quantity: number;
+    }[]
+  >([]);
 
   const limit = 5;
 
@@ -22,6 +31,34 @@ export default function InventoryPage() {
       }),
   });
 
+  ///ای پی زخیره قیمت و مجودی
+  const updateMutation = useMutation({
+    mutationFn: (change: { id: number; price: number; quantity: number }) =>
+      updateProductInventory(change.id, {
+        price: change.price,
+        quantity: change.quantity,
+      }),
+  });
+  //  تابع ذخیره
+  const handleSave = async () => {
+    if (changes.length === 0) return;
+
+    try {
+      await Promise.all(
+        changes.map((change) => updateMutation.mutateAsync(change))
+      );
+
+      setChanges([]);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["inventory"],
+      });
+    } catch (error) {
+      console.error("Inventory update error:", error);
+    }
+  };
+
+  //loading
   if (isLoading) {
     return (
       <div className="p-4 sm:p-6">
@@ -29,7 +66,7 @@ export default function InventoryPage() {
       </div>
     );
   }
-
+  //  error
   if (isError) {
     return (
       <div className="p-4 sm:p-6">
@@ -53,14 +90,16 @@ export default function InventoryPage() {
         <div className="mt-4 flex justify-end">
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-700 hover:shadow-md active:scale-95 cursor-pointer"
+            onClick={handleSave}
+            disabled={changes.length === 0 || updateMutation.isPending}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-700 hover:shadow-md active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           >
-            ذخیره
+            {updateMutation.isPending ? "در حال ذخیره..." : "ذخیره"}
           </button>
         </div>
       </div>
 
-      <InventoryTable products={products} />
+      <InventoryTable products={products} onChangesChange={setChanges} />
 
       <Pagination page={page} totalPages={totalPages} setPage={setPage} />
     </div>
