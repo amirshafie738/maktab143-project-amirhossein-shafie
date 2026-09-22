@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Product } from "@/types/product";
-import { uploadProductImage, type ProductFormData } from "@/api/product";
+import { uploadProductImage, type ProductFormData, uploadProductImages } from "@/api/product";
 import type { ProductFormValues } from "@/schemas/productSchema";
 import ProductForm from "./ProductForm";
 
@@ -24,7 +24,8 @@ export default function ProductModal({
 
   const handleSubmit = async (
     data: ProductFormValues,
-    imageFile: File | null
+    imageFile: File | null,
+    imageFiles: File[]
   ) => {
     try {
       setIsSubmitting(true);
@@ -32,14 +33,18 @@ export default function ProductModal({
 
       // عکس قبلی در حالت ویرایش
       let thumbnail = product?.thumbnail ?? "";
-
+      let images = product?.image ?? [];
       // اگر عکس جدید انتخاب شده
       if (imageFile) {
         const result = await uploadProductImage(imageFile);
 
         thumbnail = result.path;
       }
-
+      if (imageFiles.length > 0) {
+        const results = await uploadProductImages(imageFiles);
+      
+        images = results.map((item) => item.path);
+      }
       // محصول جدید باید عکس داشته باشد
       if (!thumbnail) {
         setError("لطفاً تصویر محصول را انتخاب کنید.");
@@ -50,6 +55,7 @@ export default function ProductModal({
       const productData: ProductFormData = {
         ...data,
         thumbnail,
+        image: images,
       };
 
       await onSubmit(productData);

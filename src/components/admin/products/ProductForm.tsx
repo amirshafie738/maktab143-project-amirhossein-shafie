@@ -15,7 +15,11 @@ type ProductFormProps = {
   product?: Product | null;
   onClose: () => void;
 
-  onSubmit: (data: ProductFormValues, imageFile: File | null) => Promise<void>;
+  onSubmit: (
+    data: ProductFormValues,
+    imageFile: File | null,
+    imageFiles: File[]
+  ) => Promise<void>;
 
   isSubmitting?: boolean;
   ImageError: string;
@@ -29,6 +33,7 @@ export default function ProductForm({
   ImageError,
 }: ProductFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const {
     register,
@@ -50,6 +55,16 @@ export default function ProductForm({
     },
   });
 
+  // برای انتخاب چند عکس باهم
+
+  const handleImagesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+
+    setImageFiles(files);
+  };
+
+  // برسی این که کدوم کتگری انتخاب شده
+
   const selectedCategory = watch("category");
 
   const filteredSubcategories = subcategories.filter(
@@ -57,7 +72,7 @@ export default function ProductForm({
   );
 
   const submitHandler = async (data: ProductFormValues) => {
-    await onSubmit(data, imageFile);
+    await onSubmit(data, imageFile, imageFiles);
   };
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -218,11 +233,31 @@ export default function ProductForm({
         onImageChange={setImageFile}
         disabled={isSubmitting}
       />
+      <label className="mb-1 block text-sm font-medium text-slate-700">
+        تصاویر بیشتر
+      </label>
+      <input
+        type="file"
+        accept="image/jpeg"
+        multiple
+        onChange={handleImagesChange}
+      />
+      {imageFiles.length > 0 && (
+        <div className="mt-3 space-y-1">
+          <p className="text-sm font-medium">
+            {imageFiles.length} تصویر انتخاب شده
+          </p>
+
+          {imageFiles.map((file) => (
+            <p key={file.name} className="text-sm text-slate-500">
+              {file.name}
+            </p>
+          ))}
+        </div>
+      )}
       {/* Error */}
 
-      {ImageError && (
-        <p className=" text-sm text-red-500">{ImageError}</p>
-      )}
+      {ImageError && <p className=" text-sm text-red-500">{ImageError}</p>}
       {/* توضیحات */}
 
       <div>

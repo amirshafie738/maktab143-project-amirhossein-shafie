@@ -21,8 +21,8 @@ export type ProductFormData = {
   price: number;
   quantity: number;
   thumbnail: string;
+  image: string[];
 };
-
 // گرفتن لیست محصولات
 export async function getProducts({
   page = 1,
@@ -84,6 +84,22 @@ export async function uploadProductImage(
     "/upload",
     formData
   );
+
+  return response.data;
+}
+// اپلود چند تصویر
+export async function uploadProductImages(
+  files: File[]
+): Promise<{ filename: string; path: string }[]> {
+  const formData = new FormData();
+
+  files.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  const response = await api.post<
+    { filename: string; path: string }[]
+  >("/upload-images", formData);
 
   return response.data;
 }
