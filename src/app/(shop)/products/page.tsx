@@ -19,18 +19,33 @@ export default function ProductsPage() {
 
   // تعداد محصول در هر صفحه
   const limit = 9;
-  // دسته‌بندی انتخاب‌شده
-  const [category, setCategory] = useState("");
-  const [brand, setBrand] = useState("");
+  // دسته‌بندی و برند انتخاب‌شده
+  type ProductFilters = {
+    category: string;
+    brand: string;
+    search: string;
+  };
+
+  const [filters, setFilters] = useState<ProductFilters>({
+    category: "",
+    brand: "",
+    search: "",
+  });
+
+  const [appliedFilters, setAppliedFilters] = useState<ProductFilters>({
+    category: "",
+    brand: "",
+    search: "",
+  });
+
   // دریافت محصولات
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["shop-products", page, category, brand],
+    queryKey: ["shop-products", page, appliedFilters],
     queryFn: () =>
       getFilteredProducts({
         page,
         limit,
-        category,
-        brand,
+        ...appliedFilters,
       }),
   });
   const products = data?.data ?? [];
@@ -70,15 +85,28 @@ export default function ProductsPage() {
           {/* Sidebar */}
           <div className="hidden lg:block">
             <CategorySidebar
-              category={category}
-              brand={brand}
+              filters={filters}
               onCategoryChange={(value) => {
-                setCategory(value);
-                setPage(1);
+                setFilters((prev) => ({
+                  ...prev,
+                  category: value,
+                }));
               }}
               onBrandChange={(value) => {
-                setBrand(value);
+                setFilters((prev) => ({
+                  ...prev,
+                  brand: value,
+                }));
+              }}
+              onSearchChange={(value) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  search: value,
+                }));
+              }}
+              onApply={() => {
                 setPage(1);
+                setAppliedFilters(filters);
               }}
             />
           </div>

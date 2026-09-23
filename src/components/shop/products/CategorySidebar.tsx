@@ -7,24 +7,30 @@ import { getCategories } from "@/api/categoty";
 import { getBrands } from "@/api/brand";
 
 type CategorySidebarProps = {
-  category: string;
-  brand: string;
+  filters: {
+    category: string;
+    brand: string;
+    search: string;
+  };
+
   onCategoryChange: (category: string) => void;
   onBrandChange: (brand: string) => void;
+  onSearchChange: (search: string) => void;
+  onApply: () => void;
 };
 
 export default function CategorySidebar({
-  category,
+  filters,
   onCategoryChange,
-  brand,
   onBrandChange,
+  onSearchChange,
+  onApply,
 }: CategorySidebarProps) {
-  // دریافت دسته‌بندی‌ها
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
   });
-  // brand
+
   const { data: brands = [] } = useQuery({
     queryKey: ["brands"],
     queryFn: getBrands,
@@ -32,9 +38,11 @@ export default function CategorySidebar({
 
   return (
     <aside className="w-full shrink-0 rounded-2xl border border-[#eadfd9] bg-white p-4 lg:w-60">
-      {/* عنوان فیلتر */}
+      {/* عنوان */}
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-base font-bold text-[#292929]">فیلترها</h2>
+        <h2 className="text-base font-bold text-[#292929]">
+          فیلترها
+        </h2>
 
         <FiFilter className="text-lg text-[#292929]" />
       </div>
@@ -48,6 +56,10 @@ export default function CategorySidebar({
         <div className="relative">
           <input
             type="text"
+            value={filters.search}
+            onChange={(event) =>
+              onSearchChange(event.target.value)
+            }
             placeholder="مثلاً سرم آبرسان"
             className="h-11 w-full rounded-xl border border-[#decfc7] bg-white px-3 pr-10 text-sm outline-none placeholder:text-gray-400 focus:border-[#7c243d]"
           />
@@ -59,7 +71,7 @@ export default function CategorySidebar({
       {/* دسته‌بندی */}
       <FilterSelect
         title="دسته‌بندی"
-        value={category}
+        value={filters.category}
         options={[
           {
             id: "",
@@ -74,24 +86,23 @@ export default function CategorySidebar({
       />
 
       {/* برند */}
-
-      {/* برند */}
       <FilterSelect
         title="برند"
-        value={brand}
+        value={filters.brand}
         options={[
           {
             id: "",
             name: "همه برندها",
           },
-          ...brands.map((item) => ({
-            id: item,
-            name: item,
+          ...brands.map((brand) => ({
+            id: brand,
+            name: brand,
           })),
         ]}
         onChange={onBrandChange}
       />
-      {/* بازه قیمت */}
+
+      {/* قیمت */}
       <div className="mb-5">
         <label className="mb-2 block text-sm font-semibold text-[#292929]">
           بازه قیمت (تومان)
@@ -112,38 +123,50 @@ export default function CategorySidebar({
         </div>
       </div>
 
-      {/* حداقل امتیاز */}
+      {/* امتیاز */}
       <FilterSelect
         title="حداقل امتیاز"
         value="همه امتیازها"
-        options={["همه امتیازها", "۴ به بالا", "۳ به بالا", "۲ به بالا"]}
+        options={[
+          "همه امتیازها",
+          "۴ به بالا",
+          "۳ به بالا",
+          "۲ به بالا",
+        ]}
       />
 
-      {/* چک‌باکس‌ها */}
+      {/* چک‌باکس */}
       <div className="mb-5 space-y-4">
         <label className="flex cursor-pointer items-center justify-between text-sm text-[#333]">
           <span>فقط کالاهای موجود</span>
 
-          <input type="checkbox" className="h-4 w-4 accent-[#7c243d]" />
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-[#7c243d]"
+          />
         </label>
 
         <label className="flex cursor-pointer items-center justify-between text-sm text-[#333]">
           <span>فقط محصولات تخفیف‌دار</span>
 
-          <input type="checkbox" className="h-4 w-4 accent-[#7c243d]" />
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-[#7c243d]"
+          />
         </label>
       </div>
 
-      {/* اعمال فیلتر */}
+      {/* اعمال */}
       <button
         type="button"
+        onClick={onApply}
         className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#7c243d] text-sm font-bold text-white transition hover:bg-[#681f34]"
       >
         <FiFilter />
         اعمال فیلترها
       </button>
 
-      {/* پاک کردن فیلترها */}
+      {/* پاک کردن */}
       <button
         type="button"
         className="mt-4 w-full text-center text-xs text-gray-500 transition hover:text-[#7c243d]"
@@ -154,20 +177,12 @@ export default function CategorySidebar({
   );
 }
 
-// --------------------------------
-// نوع option
-// --------------------------------
-
 type FilterOption =
   | string
   | {
       id: string;
       name: string;
     };
-
-// --------------------------------
-// Props مربوط به FilterSelect
-// --------------------------------
 
 type FilterSelectProps = {
   title: string;
@@ -176,11 +191,12 @@ type FilterSelectProps = {
   onChange?: (value: string) => void;
 };
 
-// --------------------------------
-// FilterSelect
-// --------------------------------
-
-function FilterSelect({ title, value, options, onChange }: FilterSelectProps) {
+function FilterSelect({
+  title,
+  value,
+  options,
+  onChange,
+}: FilterSelectProps) {
   return (
     <div className="mb-5">
       <label className="mb-2 block text-sm font-semibold text-[#292929]">
@@ -190,17 +206,27 @@ function FilterSelect({ title, value, options, onChange }: FilterSelectProps) {
       <div className="relative">
         <select
           value={value}
-          onChange={(event) => onChange?.(event.target.value)}
+          onChange={(event) =>
+            onChange?.(event.target.value)
+          }
           className="h-11 w-full appearance-none rounded-xl border border-[#decfc7] bg-white px-3 pl-9 text-sm text-[#333] outline-none focus:border-[#7c243d]"
         >
           {options.map((option) => {
-            const optionValue = typeof option === "string" ? option : option.id;
+            const optionValue =
+              typeof option === "string"
+                ? option
+                : option.id;
 
             const optionLabel =
-              typeof option === "string" ? option : option.name;
+              typeof option === "string"
+                ? option
+                : option.name;
 
             return (
-              <option key={optionValue} value={optionValue}>
+              <option
+                key={optionValue}
+                value={optionValue}
+              >
                 {optionLabel}
               </option>
             );
