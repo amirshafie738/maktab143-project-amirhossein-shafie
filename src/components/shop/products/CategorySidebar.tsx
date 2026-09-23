@@ -1,8 +1,35 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { FiChevronDown, FiFilter, FiSearch } from "react-icons/fi";
 
-export default function CategorySidebar() {
+import { getCategories } from "@/api/categoty";
+import { getBrands } from "@/api/brand";
+
+type CategorySidebarProps = {
+  category: string;
+  brand: string;
+  onCategoryChange: (category: string) => void;
+  onBrandChange: (brand: string) => void;
+};
+
+export default function CategorySidebar({
+  category,
+  onCategoryChange,
+  brand,
+  onBrandChange,
+}: CategorySidebarProps) {
+  // دریافت دسته‌بندی‌ها
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+  // brand
+  const { data: brands = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: getBrands,
+  });
+
   return (
     <aside className="w-full shrink-0 rounded-2xl border border-[#eadfd9] bg-white p-4 lg:w-60">
       {/* عنوان فیلتر */}
@@ -29,25 +56,40 @@ export default function CategorySidebar() {
         </div>
       </div>
 
-      {/* دسته بندی */}
+      {/* دسته‌بندی */}
       <FilterSelect
         title="دسته‌بندی"
-        value="مراقبت پوست"
-        options={["مراقبت پوست", "آرایش", "مراقبت مو", "عطر"]}
+        value={category}
+        options={[
+          {
+            id: "",
+            name: "همه دسته‌بندی‌ها",
+          },
+          ...categories.map((item) => ({
+            id: String(item.id),
+            name: item.name,
+          })),
+        ]}
+        onChange={onCategoryChange}
       />
+
+      {/* برند */}
 
       {/* برند */}
       <FilterSelect
         title="برند"
-        value="همه برندها"
-        options={["همه برندها", "لورآل", "نوتروژینا", "اوردینری"]}
-      />
-
-      {/* نوع محصول */}
-      <FilterSelect
-        title="نوع محصول"
-        value="همه انواع"
-        options={["همه انواع", "کرم", "سرم", "شوینده", "ماسک"]}
+        value={brand}
+        options={[
+          {
+            id: "",
+            name: "همه برندها",
+          },
+          ...brands.map((item) => ({
+            id: item,
+            name: item,
+          })),
+        ]}
+        onChange={onBrandChange}
       />
       {/* بازه قیمت */}
       <div className="mb-5">
@@ -77,7 +119,7 @@ export default function CategorySidebar() {
         options={["همه امتیازها", "۴ به بالا", "۳ به بالا", "۲ به بالا"]}
       />
 
-      {/* چک باکس ها */}
+      {/* چک‌باکس‌ها */}
       <div className="mb-5 space-y-4">
         <label className="flex cursor-pointer items-center justify-between text-sm text-[#333]">
           <span>فقط کالاهای موجود</span>
@@ -112,13 +154,33 @@ export default function CategorySidebar() {
   );
 }
 
+// --------------------------------
+// نوع option
+// --------------------------------
+
+type FilterOption =
+  | string
+  | {
+      id: string;
+      name: string;
+    };
+
+// --------------------------------
+// Props مربوط به FilterSelect
+// --------------------------------
+
 type FilterSelectProps = {
   title: string;
   value: string;
-  options: string[];
+  options: FilterOption[];
+  onChange?: (value: string) => void;
 };
 
-function FilterSelect({ title, value, options }: FilterSelectProps) {
+// --------------------------------
+// FilterSelect
+// --------------------------------
+
+function FilterSelect({ title, value, options, onChange }: FilterSelectProps) {
   return (
     <div className="mb-5">
       <label className="mb-2 block text-sm font-semibold text-[#292929]">
@@ -127,14 +189,22 @@ function FilterSelect({ title, value, options }: FilterSelectProps) {
 
       <div className="relative">
         <select
-          defaultValue={value}
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
           className="h-11 w-full appearance-none rounded-xl border border-[#decfc7] bg-white px-3 pl-9 text-sm text-[#333] outline-none focus:border-[#7c243d]"
         >
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
+          {options.map((option) => {
+            const optionValue = typeof option === "string" ? option : option.id;
+
+            const optionLabel =
+              typeof option === "string" ? option : option.name;
+
+            return (
+              <option key={optionValue} value={optionValue}>
+                {optionLabel}
+              </option>
+            );
+          })}
         </select>
 
         <FiChevronDown className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-600" />

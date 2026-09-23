@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import InventoryTable from "@/components/admin/inventory/InventoryTable";
-import Pagination from "@/components/admin/Pagination/Pagination";
+import Pagination from "@/components/Pagination/Pagination";
 
 import { getProducts, updateProductInventory } from "@/api/product";
 

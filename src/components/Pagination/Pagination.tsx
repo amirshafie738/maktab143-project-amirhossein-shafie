@@ -42,7 +42,7 @@ type PaginationProps = {
                   : "border border-slate-200 bg-white hover:bg-slate-50"
               }`}
             >
-              {pageNumber}
+              {pageNumber.toLocaleString("fa-IR")}
             </button>
           ))
         ) : (
@@ -90,7 +90,7 @@ type PaginationProps = {
                       : "border border-slate-200 bg-white hover:bg-slate-50"
                   }`}
                 >
-                  {pageNumber}
+                  {pageNumber.toLocaleString("fa-IR")}
                 </button>
               ))}
   

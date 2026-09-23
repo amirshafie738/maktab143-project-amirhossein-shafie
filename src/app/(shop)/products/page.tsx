@@ -4,12 +4,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FiFilter } from "react-icons/fi";
 
-import { getProducts } from "@/api/product";
-import CategorySidebar from "@/components/shop/products/CategorySidebar";
 import CategoryFilterModal from "@/components/shop/products/CategoryFilterModal";
 import ProductList from "@/components/shop/products/ProductList";
-import Pagination from "@/components/admin/Pagination/Pagination";
-
+import Pagination from "@/components/Pagination/Pagination";
+import CategorySidebar from "@/components/shop/products/CategorySidebar";
+import { getFilteredProducts } from "@/api/shop/products";
 
 export default function ProductsPage() {
   // وضعیت فیلتر موبایل
@@ -20,28 +19,28 @@ export default function ProductsPage() {
 
   // تعداد محصول در هر صفحه
   const limit = 9;
-
+  // دسته‌بندی انتخاب‌شده
+  const [category, setCategory] = useState("");
+  const [brand, setBrand] = useState("");
   // دریافت محصولات
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["shop-products", page],
+    queryKey: ["shop-products", page, category, brand],
     queryFn: () =>
-      getProducts({
+      getFilteredProducts({
         page,
         limit,
+        category,
+        brand,
       }),
   });
-
   const products = data?.data ?? [];
 
   // تعداد صفحات
-  const totalPages = Math.ceil(
-    (data?.total ?? 0) / limit
-  );
+  const totalPages = Math.ceil((data?.total ?? 0) / limit);
 
   return (
     <main className="min-h-screen bg-[#fcfaf8]">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-
         {/* عنوان صفحه */}
         <div className="mb-14 flex items-center justify-between">
           <div className="flex flex-col gap-4">
@@ -68,15 +67,24 @@ export default function ProductsPage() {
 
         {/* محتوای صفحه */}
         <div className="flex items-start gap-6">
-
           {/* Sidebar */}
           <div className="hidden lg:block">
-            <CategorySidebar />
+            <CategorySidebar
+              category={category}
+              brand={brand}
+              onCategoryChange={(value) => {
+                setCategory(value);
+                setPage(1);
+              }}
+              onBrandChange={(value) => {
+                setBrand(value);
+                setPage(1);
+              }}
+            />
           </div>
 
           {/* محصولات */}
           <section className="min-w-0 flex-1">
-
             {/* تعداد و مرتب‌سازی */}
             <div className="mb-6 flex items-center justify-between">
               <span className="text-sm text-gray-500">
@@ -115,9 +123,7 @@ export default function ProductsPage() {
             )}
 
             {/* لیست محصولات */}
-            {!isLoading && !isError && (
-              <ProductList products={products} />
-            )}
+            {!isLoading && !isError && <ProductList products={products} />}
 
             {/* صفحه‌بندی */}
             {!isLoading && !isError && totalPages > 1 && (

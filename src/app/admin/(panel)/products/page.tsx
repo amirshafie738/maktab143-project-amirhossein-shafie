@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ProductTable from "@/components/admin/products/ProductTable";
-import Pagination from "@/components/admin/Pagination/Pagination";
+import Pagination from "@/components/Pagination/Pagination";
 import ProductFilter from "@/components/admin/products/ProductFilter";
 import ProductModal from "@/components/admin/products/ProductModal";
 import {
@@ -179,7 +179,7 @@ export default function ProductsPage() {
       </div>
     );
   }
-// گرفتن دیتا و گرفتن تعداد کل صفحه
+  // گرفتن دیتا و گرفتن تعداد کل صفحه
   const products = data?.data ?? [];
 
   const totalPages = Math.ceil((data?.total ?? 0) / limit);

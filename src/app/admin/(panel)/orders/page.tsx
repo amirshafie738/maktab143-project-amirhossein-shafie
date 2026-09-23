@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FiArrowDown, FiArrowUp } from "react-icons/fi";
 
 import OrdersTable from "@/components/admin/orders/OrdersTable";
-import Pagination from "@/components/admin/Pagination/Pagination";
+import Pagination from "@/components/Pagination/Pagination";
 
 import { getOrders } from "@/api/orders";
 
