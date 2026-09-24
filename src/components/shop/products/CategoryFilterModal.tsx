@@ -6,13 +6,34 @@ import CategorySidebar from "./CategorySidebar";
 type CategoryFilterModalProps = {
   open: boolean;
   onClose: () => void;
+
+  filters: {
+    category: string;
+    brand: string;
+    search: string;
+  };
+
+  onCategoryChange: (category: string) => void;
+  onBrandChange: (brand: string) => void;
+  onSearchChange: (search: string) => void;
+  onApply: () => void;
 };
 
 export default function CategoryFilterModal({
   open,
   onClose,
+  filters,
+  onCategoryChange,
+  onBrandChange,
+  onSearchChange,
+  onApply,
 }: CategoryFilterModalProps) {
   if (!open) return null;
+
+  const handleApply = () => {
+    onApply();
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
@@ -24,7 +45,6 @@ export default function CategoryFilterModal({
 
       {/* Modal */}
       <div className="absolute bottom-0 right-0 max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-white">
-        
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-5 py-4">
           <div className="flex items-center gap-2">
@@ -46,9 +66,14 @@ export default function CategoryFilterModal({
 
         {/* Filter */}
         <div className="p-4">
-          <CategorySidebar />
+          <CategorySidebar
+            filters={filters}
+            onCategoryChange={onCategoryChange}
+            onBrandChange={onBrandChange}
+            onSearchChange={onSearchChange}
+            onApply={handleApply}
+          />
         </div>
-
       </div>
     </div>
   );

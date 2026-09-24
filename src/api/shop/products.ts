@@ -3,12 +3,14 @@ import { api } from "../axios";
 import { ProductsResponse } from "../product";
 
 export type ProductFilters = {
-    page?: number;
-    limit?: number;
-    category?: string;
-    brand?: string;
-    search?: string;
-  };
+  page?: number;
+  limit?: number;
+  category?: string;
+  brand?: string;
+  search?: string;
+  minPrice?: string;
+  maxPrice?: string;
+};
 
 export async function getFilteredProducts({
   page = 1,
@@ -16,6 +18,8 @@ export async function getFilteredProducts({
   category = "",
   brand = "",
   search = "",
+  minPrice="",
+  maxPrice=""
 }: ProductFilters = {}): Promise<ProductsResponse> {
   const response = await api.get<Product[]>("/products", {
     params: {
@@ -24,6 +28,8 @@ export async function getFilteredProducts({
       ...(category && { category }),
       ...(brand && { brand }),
       ...(search && { q: search }),
+      ...(minPrice && { price_gte: minPrice }),
+      ...(maxPrice && { price_lte: maxPrice }),
     },
   });
 

@@ -24,19 +24,26 @@ export default function ProductsPage() {
     category: string;
     brand: string;
     search: string;
+    minPrice: string;
+    maxPrice: string;
   };
 
   const [filters, setFilters] = useState<ProductFilters>({
     category: "",
     brand: "",
     search: "",
+    minPrice: "",
+    maxPrice: "",
   });
-
-  const [appliedFilters, setAppliedFilters] = useState<ProductFilters>({
-    category: "",
-    brand: "",
-    search: "",
-  });
+  
+  const [appliedFilters, setAppliedFilters] =
+    useState<ProductFilters>({
+      category: "",
+      brand: "",
+      search: "",
+      minPrice: "",
+      maxPrice: "",
+    });
 
   // دریافت محصولات
   const { data, isLoading, isError } = useQuery({
@@ -108,6 +115,19 @@ export default function ProductsPage() {
                 setPage(1);
                 setAppliedFilters(filters);
               }}
+              onMinPriceChange={(value) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  minPrice: value,
+                }));
+              }}
+              
+              onMaxPriceChange={(value) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  maxPrice: value,
+                }));
+              }}
             />
           </div>
 
@@ -169,6 +189,29 @@ export default function ProductsPage() {
       <CategoryFilterModal
         open={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
+        filters={filters}
+        onCategoryChange={(value) => {
+          setFilters((prev) => ({
+            ...prev,
+            category: value,
+          }));
+        }}
+        onBrandChange={(value) => {
+          setFilters((prev) => ({
+            ...prev,
+            brand: value,
+          }));
+        }}
+        onSearchChange={(value) => {
+          setFilters((prev) => ({
+            ...prev,
+            search: value,
+          }));
+        }}
+        onApply={() => {
+          setPage(1);
+          setAppliedFilters(filters);
+        }}
       />
     </main>
   );
