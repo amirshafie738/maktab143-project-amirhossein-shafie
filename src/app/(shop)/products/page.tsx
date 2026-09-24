@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FiFilter } from "react-icons/fi";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams,useRouter } from "next/navigation";
 
 import CategoryFilterModal from "@/components/shop/products/CategoryFilterModal";
 import ProductList from "@/components/shop/products/ProductList";
 import Pagination from "@/components/Pagination/Pagination";
 import CategorySidebar from "@/components/shop/products/CategorySidebar";
 import { getFilteredProducts } from "@/api/shop/products";
+
 type ProductFilters = {
   category: string;
   brand: string;
@@ -23,12 +24,10 @@ const FILTER_STORAGE_KEY = "shop-filters";
 
 type SavedFilterState = {
   filters: ProductFilters;
-  sort: string;
 };
 export default function ProductsPage() {
-
   const searchParams = useSearchParams();
-
+  const router = useRouter();
   const categoryFromUrl = searchParams.get("category") ?? "";
 
   const isFirstCategoryRender = useRef(true);
@@ -46,17 +45,7 @@ export default function ProductsPage() {
   const [sort, setSort] = useState("");
 
   // دسته‌بندی و برند انتخاب‌شده
-const [filters, setFilters] = useState<ProductFilters>({
-  category: categoryFromUrl,
-  brand: "",
-  search: "",
-  minPrice: "",
-  maxPrice: "",
-  minRating: "",
-  inStock: false,
-});
-const [appliedFilters, setAppliedFilters] =
-  useState<ProductFilters>({
+  const [filters, setFilters] = useState<ProductFilters>({
     category: categoryFromUrl,
     brand: "",
     search: "",
@@ -65,54 +54,67 @@ const [appliedFilters, setAppliedFilters] =
     minRating: "",
     inStock: false,
   });
-
-  // لوکال استوریج
+  const [appliedFilters, setAppliedFilters] = useState<ProductFilters>({
+    category: categoryFromUrl,
+    brand: "",
+    search: "",
+    minPrice: "",
+    maxPrice: "",
+    minRating: "",
+    inStock: false,
+  });
+  //فیلترهای ذخیره‌شده در LocalStorage را برمی‌گرداند.
   useEffect(() => {
-    // اگر دسته‌بندی از URL آمده باشد،
-    // localStorage نباید آن را overwrite کند.
-    if (categoryFromUrl) {
-      return;
-    }
-  
-    const savedFilters =
-      localStorage.getItem(FILTER_STORAGE_KEY);
+    const savedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
   
     if (!savedFilters) return;
   
     try {
-      const parsed: SavedFilterState =
-        JSON.parse(savedFilters);
+      const parsed: SavedFilterState = JSON.parse(savedFilters);
   
-      setFilters(parsed.filters);
-      setAppliedFilters(parsed.filters);
-      setSort(parsed.sort || "newest");
+      const restoredFilters: ProductFilters = {
+        ...parsed.filters,
+        category: categoryFromUrl || parsed.filters.category,
+      };
+  
+      setFilters(restoredFilters);
+      setAppliedFilters(restoredFilters);
     } catch (error) {
       console.error("خطا در خواندن فیلترها:", error);
   
       localStorage.removeItem(FILTER_STORAGE_KEY);
     }
-  }, [categoryFromUrl]);
-  
+  }, []);
+
+  //وقتی category داخل URL تغییر کرد، state را با URL هماهنگ می‌کند.
+
   useEffect(() => {
-    // در اولین render، مقدار category
-    // از useState گرفته شده و نیازی به تغییر دوباره نیست.
     if (isFirstCategoryRender.current) {
       isFirstCategoryRender.current = false;
       return;
     }
   
-    // وقتی از Header یک دسته‌بندی جدید انتخاب شد
-    setFilters((prev) => ({
-      ...prev,
+    const newFilters: ProductFilters = {
       category: categoryFromUrl,
-    }));
+      brand: "",
+      search: "",
+      minPrice: "",
+      maxPrice: "",
+      minRating: "",
+      inStock: false,
+    };
   
-    setAppliedFilters((prev) => ({
-      ...prev,
-      category: categoryFromUrl,
-    }));
-  
+    setFilters(newFilters);
+    setAppliedFilters(newFilters);
     setPage(1);
+  
+    // فیلتر جدید را در LocalStorage هم ذخیره کن
+    localStorage.setItem(
+      FILTER_STORAGE_KEY,
+      JSON.stringify({
+        filters: newFilters,
+      })
+    );
   }, [categoryFromUrl]);
 
   // تابع حذف فیلتر ها
@@ -229,14 +231,19 @@ const [appliedFilters, setAppliedFilters] =
               onApply={() => {
                 setPage(1);
                 setAppliedFilters(filters);
-
+              
                 localStorage.setItem(
                   FILTER_STORAGE_KEY,
                   JSON.stringify({
                     filters,
-                    sort,
                   })
                 );
+              
+                if (filters.category) {
+                  router.push(`/products?category=${filters.category}`);
+                } else {
+                  router.push("/products");
+                }
               }}
               onClear={handleClearFilters}
             />
@@ -325,14 +332,19 @@ const [appliedFilters, setAppliedFilters] =
         onApply={() => {
           setPage(1);
           setAppliedFilters(filters);
-
+        
           localStorage.setItem(
             FILTER_STORAGE_KEY,
             JSON.stringify({
               filters,
-              sort,
             })
           );
+        
+          if (filters.category) {
+            router.push(`/products?category=${filters.category}`);
+          } else {
+            router.push("/products");
+          }
         }}
         onClear={handleClearFilters}
       />
