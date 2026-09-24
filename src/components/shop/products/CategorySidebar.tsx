@@ -14,6 +14,7 @@ type CategorySidebarProps = {
     maxPrice: string;
     minPrice: string;
     inStock: boolean;
+    minRating: string;
   };
   onMinPriceChange: (value: string) => void;
   onMaxPriceChange: (value: string) => void;
@@ -23,6 +24,7 @@ type CategorySidebarProps = {
   onApply: () => void;
   onClear: () => void;
   onInStockChange: (value: boolean) => void;
+  onRatingChange: (value: string) => void;
 };
 
 export default function CategorySidebar({
@@ -35,6 +37,8 @@ export default function CategorySidebar({
   onMaxPriceChange,
   onMinPriceChange,
   onInStockChange,
+  onRatingChange
+  
 }: CategorySidebarProps) {
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -136,8 +140,14 @@ export default function CategorySidebar({
       {/* امتیاز */}
       <FilterSelect
         title="حداقل امتیاز"
-        value="همه امتیازها"
-        options={["همه امتیازها", "۴ به بالا", "۳ به بالا", "۲ به بالا"]}
+        value={filters.minRating}
+        options={[
+          { id: "", name: "همه امتیازها" },
+          { id: "4", name: "۴ به بالا" },
+          { id: "3", name: "۳ به بالا" },
+          { id: "2", name: "۲ به بالا" },
+        ]}
+        onChange={onRatingChange}
       />
 
       {/* چک‌باکس */}

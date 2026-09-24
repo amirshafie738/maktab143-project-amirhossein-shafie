@@ -10,4 +10,5 @@ export type Product = {
   subcategory: number;
   description: string;
   createdAt: number;
+  rating: number;
 };

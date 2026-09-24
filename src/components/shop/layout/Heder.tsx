@@ -10,19 +10,19 @@ const menuItems = [
   },
   {
     title: "مراقبت پوست",
-    href: "#",
+    href: "/products?category=1",
   },
   {
     title: "آرایش",
-    href: "#",
+    href: "/products?category=3",
   },
   {
     title: "مراقبت مو",
-    href: "#",
+    href: "/products?category=2",
   },
   {
     title: "عطر",
-    href: "#",
+    href: "/products?category=4",
   },
   {
     title: "مجله سایت",

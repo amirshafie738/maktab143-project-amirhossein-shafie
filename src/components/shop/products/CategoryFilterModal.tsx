@@ -3,20 +3,32 @@
 import { FiFilter, FiX } from "react-icons/fi";
 import CategorySidebar from "./CategorySidebar";
 
+type ProductFilters = {
+  category: string;
+  brand: string;
+  search: string;
+  minPrice: string;
+  maxPrice: string;
+  minRating: string;
+  inStock: boolean;
+};
+
 type CategoryFilterModalProps = {
   open: boolean;
   onClose: () => void;
 
-  filters: {
-    category: string;
-    brand: string;
-    search: string;
-  };
+  filters: ProductFilters;
 
   onCategoryChange: (category: string) => void;
   onBrandChange: (brand: string) => void;
   onSearchChange: (search: string) => void;
+  onMinPriceChange: (value: string) => void;
+  onMaxPriceChange: (value: string) => void;
+  onRatingChange: (value: string) => void;
+  onInStockChange: (value: boolean) => void;
+
   onApply: () => void;
+  onClear: () => void;
 };
 
 export default function CategoryFilterModal({
@@ -26,7 +38,12 @@ export default function CategoryFilterModal({
   onCategoryChange,
   onBrandChange,
   onSearchChange,
+  onMinPriceChange,
+  onMaxPriceChange,
+  onRatingChange,
+  onInStockChange,
   onApply,
+  onClear,
 }: CategoryFilterModalProps) {
   if (!open) return null;
 
@@ -71,7 +88,12 @@ export default function CategoryFilterModal({
             onCategoryChange={onCategoryChange}
             onBrandChange={onBrandChange}
             onSearchChange={onSearchChange}
+            onMinPriceChange={onMinPriceChange}
+            onMaxPriceChange={onMaxPriceChange}
+            onRatingChange={onRatingChange}
+            onInStockChange={onInStockChange}
             onApply={handleApply}
+            onClear={onClear}
           />
         </div>
       </div>

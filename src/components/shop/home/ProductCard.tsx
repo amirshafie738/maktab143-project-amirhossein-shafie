@@ -61,7 +61,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className="text-sm text-[#777]">{product.brand}</span>
 
           <div className="flex items-center gap-1 text-sm text-[#999]">
-            <span>۴.۸</span>
+            <span>{product.rating}</span>
 
             <FiStar size={15} className="fill-[#b98a59] text-[#b98a59]" />
           </div>

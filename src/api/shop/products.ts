@@ -12,6 +12,7 @@ export type ProductFilters = {
   maxPrice?: string;
   sort?: string;
   inStock?: boolean;
+  minRating?: string;
 };
 
 export async function getFilteredProducts({
@@ -22,6 +23,7 @@ export async function getFilteredProducts({
   search = "",
   minPrice = "",
   maxPrice = "",
+  minRating = "",
   inStock = false,
   sort = "newest",
 }: ProductFilters = {}): Promise<ProductsResponse> {
@@ -53,6 +55,7 @@ export async function getFilteredProducts({
       ...(minPrice && { price_gte: minPrice }),
       ...(maxPrice && { price_lte: maxPrice }),
       ...(inStock && { quantity_gte: "1" }),
+      ...(minRating && { rating_gte: minRating }),
       _sort: sortField,
       _order: sortOrder,
     },
