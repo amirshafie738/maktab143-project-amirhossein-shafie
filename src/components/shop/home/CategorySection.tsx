@@ -31,17 +31,8 @@ export default function CategorySection() {
   return (
     <section className="bg-[#fcfaf7] py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
         {/* عنوان */}
         <div className="mb-8 flex items-end justify-between">
-          <Link
-            href="/products"
-            className="flex items-center gap-2 text-sm font-bold text-[#333] transition hover:text-[#7c243d]"
-          >
-            مشاهده همه
-            <span className="text-lg">←</span>
-          </Link>
-
           <div className="text-right">
             <p className="mb-2 text-sm font-bold text-[#7c243d]">
               انتخاب بر اساس دسته
@@ -51,6 +42,13 @@ export default function CategorySection() {
               هر چیزی که روتین شما نیاز دارد
             </h2>
           </div>
+          <Link
+            href="/products"
+            className="flex items-center gap-2 text-sm font-bold text-[#333] transition hover:text-[#7c243d]"
+          >
+            مشاهده همه
+            <span className="text-lg">←</span>
+          </Link>
         </div>
 
         {/* دسته‌بندی‌ها */}
@@ -74,9 +72,7 @@ export default function CategorySection() {
 
               {/* متن */}
               <div className="absolute bottom-0 right-0 left-0 p-6 text-right text-white">
-                <h3 className="text-2xl font-extrabold">
-                  {category.title}
-                </h3>
+                <h3 className="text-2xl font-extrabold">{category.title}</h3>
 
                 <p className="mt-1 text-sm text-white/80">
                   {category.description}
@@ -85,7 +81,6 @@ export default function CategorySection() {
             </Link>
           ))}
         </div>
-
       </div>
     </section>
   );

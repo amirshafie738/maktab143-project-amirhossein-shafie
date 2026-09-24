@@ -1,3 +1,4 @@
+import CategoryProducts from "@/components/shop/home/CategoryProducts";
 import CategorySection from "@/components/shop/home/CategorySection";
 import Hero from "@/components/shop/home/Hero";
 
@@ -6,6 +7,7 @@ export default function HomePage() {
     <main className="min-h-screen">
       <Hero />
       <CategorySection />
+      <CategoryProducts />
     </main>
   );
 }
