@@ -9,6 +9,14 @@ import ProductList from "@/components/shop/products/ProductList";
 import Pagination from "@/components/Pagination/Pagination";
 import CategorySidebar from "@/components/shop/products/CategorySidebar";
 import { getFilteredProducts } from "@/api/shop/products";
+type ProductFilters = {
+  category: string;
+  brand: string;
+  search: string;
+  minPrice: string;
+  maxPrice: string;
+  inStock: boolean;
+};
 
 export default function ProductsPage() {
   // وضعیت فیلتر موبایل
@@ -19,40 +27,53 @@ export default function ProductsPage() {
 
   // تعداد محصول در هر صفحه
   const limit = 9;
-  // دسته‌بندی و برند انتخاب‌شده
-  type ProductFilters = {
-    category: string;
-    brand: string;
-    search: string;
-    minPrice: string;
-    maxPrice: string;
-  };
 
+  // sort
+  const [sort, setSort] = useState("");
+
+  // دسته‌بندی و برند انتخاب‌شده
   const [filters, setFilters] = useState<ProductFilters>({
     category: "",
     brand: "",
     search: "",
     minPrice: "",
     maxPrice: "",
+    inStock: false,
   });
-  
-  const [appliedFilters, setAppliedFilters] =
-    useState<ProductFilters>({
+  const [appliedFilters, setAppliedFilters] = useState<ProductFilters>({
+    category: "",
+    brand: "",
+    search: "",
+    minPrice: "",
+    maxPrice: "",
+    inStock: false,
+  });
+  // تابع حذف فیلتر ها
+  const handleClearFilters = () => {
+    const emptyFilters: ProductFilters = {
       category: "",
       brand: "",
       search: "",
       minPrice: "",
       maxPrice: "",
-    });
+      inStock: false,
+    };
+
+    setFilters(emptyFilters);
+    setAppliedFilters(emptyFilters);
+    setPage(1);
+  };
 
   // دریافت محصولات
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["shop-products", page, appliedFilters],
+    queryKey: ["shop-products", page, appliedFilters, sort],
+
     queryFn: () =>
       getFilteredProducts({
         page,
         limit,
         ...appliedFilters,
+        sort,
       }),
   });
   const products = data?.data ?? [];
@@ -93,41 +114,47 @@ export default function ProductsPage() {
           <div className="hidden lg:block">
             <CategorySidebar
               filters={filters}
-              onCategoryChange={(value) => {
+              onCategoryChange={(category) =>
                 setFilters((prev) => ({
                   ...prev,
-                  category: value,
-                }));
-              }}
-              onBrandChange={(value) => {
+                  category,
+                }))
+              }
+              onBrandChange={(brand) =>
                 setFilters((prev) => ({
                   ...prev,
-                  brand: value,
-                }));
-              }}
-              onSearchChange={(value) => {
+                  brand,
+                }))
+              }
+              onSearchChange={(search) =>
                 setFilters((prev) => ({
                   ...prev,
-                  search: value,
-                }));
-              }}
+                  search,
+                }))
+              }
+              onMinPriceChange={(minPrice) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  minPrice,
+                }))
+              }
+              onMaxPriceChange={(maxPrice) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  maxPrice,
+                }))
+              }
+              onInStockChange={(inStock) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  inStock,
+                }))
+              }
               onApply={() => {
                 setPage(1);
                 setAppliedFilters(filters);
               }}
-              onMinPriceChange={(value) => {
-                setFilters((prev) => ({
-                  ...prev,
-                  minPrice: value,
-                }));
-              }}
-              
-              onMaxPriceChange={(value) => {
-                setFilters((prev) => ({
-                  ...prev,
-                  maxPrice: value,
-                }));
-              }}
+              onClear={handleClearFilters}
             />
           </div>
 
@@ -145,13 +172,13 @@ export default function ProductsPage() {
                 </span>
 
                 <select
-                  defaultValue="newest"
-                  className="h-10 rounded-xl border border-[#decfc7] bg-white px-3 text-sm outline-none"
+                  value={sort}
+                  onChange={(event) => setSort(event.target.value)}
                 >
                   <option value="newest">جدیدترین</option>
-                  <option value="popular">محبوب‌ترین</option>
-                  <option value="price-low">ارزان‌ترین</option>
-                  <option value="price-high">گران‌ترین</option>
+                  <option value="oldest">قدیمی‌ترین</option>
+                  <option value="price-asc">ارزان‌ترین</option>
+                  <option value="price-desc">گران‌ترین</option>
                 </select>
               </div>
             </div>

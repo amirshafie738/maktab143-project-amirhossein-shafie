@@ -11,8 +11,9 @@ type CategorySidebarProps = {
     category: string;
     brand: string;
     search: string;
-    maxPrice:string;
-    minPrice:string;
+    maxPrice: string;
+    minPrice: string;
+    inStock: boolean;
   };
   onMinPriceChange: (value: string) => void;
   onMaxPriceChange: (value: string) => void;
@@ -20,6 +21,8 @@ type CategorySidebarProps = {
   onBrandChange: (brand: string) => void;
   onSearchChange: (search: string) => void;
   onApply: () => void;
+  onClear: () => void;
+  onInStockChange: (value: boolean) => void;
 };
 
 export default function CategorySidebar({
@@ -28,8 +31,10 @@ export default function CategorySidebar({
   onBrandChange,
   onSearchChange,
   onApply,
+  onClear,
   onMaxPriceChange,
   onMinPriceChange,
+  onInStockChange,
 }: CategorySidebarProps) {
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -140,13 +145,12 @@ export default function CategorySidebar({
         <label className="flex cursor-pointer items-center justify-between text-sm text-[#333]">
           <span>فقط کالاهای موجود</span>
 
-          <input type="checkbox" className="h-4 w-4 accent-[#7c243d]" />
-        </label>
-
-        <label className="flex cursor-pointer items-center justify-between text-sm text-[#333]">
-          <span>فقط محصولات تخفیف‌دار</span>
-
-          <input type="checkbox" className="h-4 w-4 accent-[#7c243d]" />
+          <input
+            type="checkbox"
+            checked={filters.inStock}
+            onChange={(event) => onInStockChange(event.target.checked)}
+            className="h-4 w-4 accent-[#7c243d]"
+          />
         </label>
       </div>
 
@@ -163,6 +167,7 @@ export default function CategorySidebar({
       {/* پاک کردن */}
       <button
         type="button"
+        onClick={onClear}
         className="mt-4 w-full text-center text-xs text-gray-500 transition hover:text-[#7c243d]"
       >
         پاک کردن همه فیلترها
