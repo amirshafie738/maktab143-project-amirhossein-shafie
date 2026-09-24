@@ -1,11 +1,58 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { FiChevronDown, FiFilter, FiSearch } from "react-icons/fi";
 
-export default function CategorySidebar() {
+import { getCategories } from "@/api/categoty";
+import { getBrands } from "@/api/brand";
+
+type CategorySidebarProps = {
+  filters: {
+    category: string;
+    brand: string;
+    search: string;
+    maxPrice: string;
+    minPrice: string;
+    inStock: boolean;
+    minRating: string;
+  };
+  onMinPriceChange: (value: string) => void;
+  onMaxPriceChange: (value: string) => void;
+  onCategoryChange: (category: string) => void;
+  onBrandChange: (brand: string) => void;
+  onSearchChange: (search: string) => void;
+  onApply: () => void;
+  onClear: () => void;
+  onInStockChange: (value: boolean) => void;
+  onRatingChange: (value: string) => void;
+};
+
+export default function CategorySidebar({
+  filters,
+  onCategoryChange,
+  onBrandChange,
+  onSearchChange,
+  onApply,
+  onClear,
+  onMaxPriceChange,
+  onMinPriceChange,
+  onInStockChange,
+  onRatingChange
+  
+}: CategorySidebarProps) {
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+
+  const { data: brands = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: getBrands,
+  });
+
   return (
-    <aside className="w-full shrink-0 rounded-2xl border border-[#eadfd9] bg-white p-4 lg:w-[245px]">
-      {/* عنوان فیلتر */}
+    <aside className="w-full shrink-0 rounded-2xl border border-[#eadfd9] bg-white p-4 lg:w-60">
+      {/* عنوان */}
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-base font-bold text-[#292929]">فیلترها</h2>
 
@@ -21,6 +68,8 @@ export default function CategorySidebar() {
         <div className="relative">
           <input
             type="text"
+            value={filters.search}
+            onChange={(event) => onSearchChange(event.target.value)}
             placeholder="مثلاً سرم آبرسان"
             className="h-11 w-full rounded-xl border border-[#decfc7] bg-white px-3 pr-10 text-sm outline-none placeholder:text-gray-400 focus:border-[#7c243d]"
           />
@@ -29,27 +78,41 @@ export default function CategorySidebar() {
         </div>
       </div>
 
-      {/* دسته بندی */}
+      {/* دسته‌بندی */}
       <FilterSelect
         title="دسته‌بندی"
-        value="مراقبت پوست"
-        options={["مراقبت پوست", "آرایش", "مراقبت مو", "عطر"]}
+        value={filters.category}
+        options={[
+          {
+            id: "",
+            name: "همه دسته‌بندی‌ها",
+          },
+          ...categories.map((item) => ({
+            id: String(item.id),
+            name: item.name,
+          })),
+        ]}
+        onChange={onCategoryChange}
       />
 
       {/* برند */}
       <FilterSelect
         title="برند"
-        value="همه برندها"
-        options={["همه برندها", "لورآل", "نوتروژینا", "اوردینری"]}
+        value={filters.brand}
+        options={[
+          {
+            id: "",
+            name: "همه برندها",
+          },
+          ...brands.map((brand) => ({
+            id: brand,
+            name: brand,
+          })),
+        ]}
+        onChange={onBrandChange}
       />
 
-      {/* نوع محصول */}
-      <FilterSelect
-        title="نوع محصول"
-        value="همه انواع"
-        options={["همه انواع", "کرم", "سرم", "شوینده", "ماسک"]}
-      />
-      {/* بازه قیمت */}
+      {/* قیمت */}
       <div className="mb-5">
         <label className="mb-2 block text-sm font-semibold text-[#292929]">
           بازه قیمت (تومان)
@@ -58,52 +121,63 @@ export default function CategorySidebar() {
         <div className="flex gap-2">
           <input
             type="number"
+            value={filters.minPrice}
+            onChange={(event) => onMinPriceChange(event.target.value)}
             placeholder="از"
             className="h-11 w-1/2 rounded-xl border border-[#decfc7] px-3 text-sm outline-none focus:border-[#7c243d]"
           />
 
           <input
             type="number"
+            value={filters.maxPrice}
+            onChange={(event) => onMaxPriceChange(event.target.value)}
             placeholder="تا"
             className="h-11 w-1/2 rounded-xl border border-[#decfc7] px-3 text-sm outline-none focus:border-[#7c243d]"
           />
         </div>
       </div>
 
-      {/* حداقل امتیاز */}
+      {/* امتیاز */}
       <FilterSelect
         title="حداقل امتیاز"
-        value="همه امتیازها"
-        options={["همه امتیازها", "۴ به بالا", "۳ به بالا", "۲ به بالا"]}
+        value={filters.minRating}
+        options={[
+          { id: "", name: "همه امتیازها" },
+          { id: "4", name: "۴ به بالا" },
+          { id: "3", name: "۳ به بالا" },
+          { id: "2", name: "۲ به بالا" },
+        ]}
+        onChange={onRatingChange}
       />
 
-      {/* چک باکس ها */}
+      {/* چک‌باکس */}
       <div className="mb-5 space-y-4">
         <label className="flex cursor-pointer items-center justify-between text-sm text-[#333]">
           <span>فقط کالاهای موجود</span>
 
-          <input type="checkbox" className="h-4 w-4 accent-[#7c243d]" />
-        </label>
-
-        <label className="flex cursor-pointer items-center justify-between text-sm text-[#333]">
-          <span>فقط محصولات تخفیف‌دار</span>
-
-          <input type="checkbox" className="h-4 w-4 accent-[#7c243d]" />
+          <input
+            type="checkbox"
+            checked={filters.inStock}
+            onChange={(event) => onInStockChange(event.target.checked)}
+            className="h-4 w-4 accent-[#7c243d]"
+          />
         </label>
       </div>
 
-      {/* اعمال فیلتر */}
+      {/* اعمال */}
       <button
         type="button"
+        onClick={onApply}
         className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#7c243d] text-sm font-bold text-white transition hover:bg-[#681f34]"
       >
         <FiFilter />
         اعمال فیلترها
       </button>
 
-      {/* پاک کردن فیلترها */}
+      {/* پاک کردن */}
       <button
         type="button"
+        onClick={onClear}
         className="mt-4 w-full text-center text-xs text-gray-500 transition hover:text-[#7c243d]"
       >
         پاک کردن همه فیلترها
@@ -112,13 +186,21 @@ export default function CategorySidebar() {
   );
 }
 
+type FilterOption =
+  | string
+  | {
+      id: string;
+      name: string;
+    };
+
 type FilterSelectProps = {
   title: string;
   value: string;
-  options: string[];
+  options: FilterOption[];
+  onChange?: (value: string) => void;
 };
 
-function FilterSelect({ title, value, options }: FilterSelectProps) {
+function FilterSelect({ title, value, options, onChange }: FilterSelectProps) {
   return (
     <div className="mb-5">
       <label className="mb-2 block text-sm font-semibold text-[#292929]">
@@ -127,14 +209,22 @@ function FilterSelect({ title, value, options }: FilterSelectProps) {
 
       <div className="relative">
         <select
-          defaultValue={value}
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
           className="h-11 w-full appearance-none rounded-xl border border-[#decfc7] bg-white px-3 pl-9 text-sm text-[#333] outline-none focus:border-[#7c243d]"
         >
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
+          {options.map((option) => {
+            const optionValue = typeof option === "string" ? option : option.id;
+
+            const optionLabel =
+              typeof option === "string" ? option : option.name;
+
+            return (
+              <option key={optionValue} value={optionValue}>
+                {optionLabel}
+              </option>
+            );
+          })}
         </select>
 
         <FiChevronDown className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-600" />
