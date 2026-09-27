@@ -38,10 +38,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           <FiHeart size={21} />
         </button>
 
-        {/* منتخب */}
-        <span className="absolute left-3 top-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-[#444] shadow-sm">
-          منتخب
-        </span>
 
         {/* سبد خرید */}
         <button

@@ -2,15 +2,23 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+
 import { getFilteredProducts } from "@/api/shop/products";
 import ProductCard from "@/components/shop/home/ProductCard";
 
-export default function CategoryProducts() {
-  const { data, isLoading } = useQuery({
-    queryKey: ["home-makeup-products"],
+type CategoryProductsProps = {
+  category: string;
+  title: string;
+};
+export default function CategoryProducts({
+  category,
+  title,
+}: CategoryProductsProps) {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["category-products", category],
     queryFn: () =>
       getFilteredProducts({
-        category: "3",
+        category,
         limit: 4,
         sort: "newest",
       }),
@@ -23,25 +31,19 @@ export default function CategoryProducts() {
   const products = data?.data ?? [];
 
   return (
-    <section className="bg-[#fcfaf7] py-16">
+    <section className="bg-[#fcfaf7] py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* عنوان */}
-        <div className="mb-8 flex items-end justify-between">
-          <div className="text-right">
-            <p className="mb-2 text-sm font-bold text-[#7c243d]">
-              محصولات آرایشی
-            </p>
-
-            <h2 className="text-3xl font-extrabold text-[#222] sm:text-4xl">
-              محبوب‌ترین محصولات آرایشی
-            </h2>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-[#292929]">{title}</h2>
           </div>
+
           <Link
-            href="/products?category=3"
-            className="flex items-center gap-2 text-sm font-bold text-[#333] transition hover:text-[#7c243d]"
+            href={`/products?category=${category}`}
+            className="text-sm font-semibold text-[#292929]"
           >
-            مشاهده همه
-            <span className="text-lg">←</span>
+            مشاهده همه ←
           </Link>
         </div>
 

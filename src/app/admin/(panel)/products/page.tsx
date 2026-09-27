@@ -143,12 +143,16 @@ export default function ProductsPage() {
 
   const handleDeleteProduct = async (id: number) => {
     const confirmed = window.confirm("آیا از حذف این محصول مطمئن هستید؟");
-
+  
     if (!confirmed) {
       return;
     }
-
+  
     await deleteMutation.mutateAsync(id);
+  
+    if (products.length === 1 && page > 1) {
+      setPage(page - 1);
+    }
   };
 
   // -----------------------------

@@ -11,27 +11,27 @@ import {
   FiTruck,
   FiRotateCcw,
 } from "react-icons/fi";
+
 import type { Product } from "@/types/product";
+import ProductSlider from "./ProductSlider";
 
 type ProductCartProps = {
   product: Product;
 };
 
-export default function ProductCart({
-  product,
-}: ProductCartProps) {
+export default function ProductCart({ product }: ProductCartProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
   const images =
     product.image?.length > 0
       ? product.image
-      : [product.thumbnail];
+      : product.thumbnail
+      ? [product.thumbnail]
+      : [];
 
   const imageUrl = (image: string) =>
-    image.startsWith("/files/")
-      ? `http://localhost:3001${image}`
-      : image;
+    image.startsWith("/files/") ? `http://localhost:3001${image}` : image;
 
   const isOutOfStock = product.quantity === 0;
 
@@ -48,210 +48,213 @@ export default function ProductCart({
   };
 
   return (
-    <main className=" bg-[#fcfaf7]">
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
-    
-
-        {/* کارت محصول */}
-        <div className="grid gap-10 lg:grid-cols-2">
-
-          {/* ================= تصاویر ================= */}
-          <div className="flex flex-row-reverse gap-3">
-
-            {/* تصویر اصلی */}
-            <div className="flex-1 overflow-hidden rounded-[25px] bg-[#eee7df]">
-              <div className="aspect-square">
-                <img
-                  src={imageUrl(images[selectedImage])}
-                  alt={product.name}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            </div>
-
-            {/* تصاویر کوچک */}
-            <div className="flex w-20 flex-col gap-3">
-              {images.map((image, index) => (
-                <button
-                  key={`${image}-${index}`}
-                  type="button"
-                  onClick={() => setSelectedImage(index)}
-                  className={`overflow-hidden rounded-xl border-2 bg-[#eee7df] transition ${
-                    selectedImage === index
-                      ? "border-[#7c243d]"
-                      : "border-transparent"
-                  }`}
-                >
-                  <img
-                    src={imageUrl(image)}
-                    alt={`${product.name} ${index + 1}`}
-                    className="aspect-square w-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+    <main className="bg-[#fcfaf7]">
+      <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        {/* ================= کارت اصلی محصول ================= */}
+        <div className="grid min-w-0 gap-10 lg:grid-cols-2 lg:gap-14">
+          {/* ================= گالری ================= */}
+          {/* ================= گالری ================= */}
+          <div className="min-w-0 w-full">
+            <ProductSlider
+              images={images}
+              productName={product.name}
+              imageUrl={imageUrl}
+            />
           </div>
 
           {/* ================= اطلاعات محصول ================= */}
-          <div className="flex flex-col justify-center text-right">
-
+          <div className="min-w-0 flex flex-col justify-center text-right">
             {/* برند */}
-            <p className="mb-2 text-sm font-bold text-[#8b2944]">
-              {product.brand}
-            </p>
+            <div className="mb-4 flex items-center justify-start gap-3">
+              <span className="rounded-full bg-[#f8edf0] px-4 py-1.5 text-xs font-bold text-[#8b2944]">
+                {product.brand}
+              </span>
 
-            {/* نام */}
-            <h1 className="text-3xl font-extrabold leading-[1.8] text-[#202020]">
+              <span className="h-1 w-1 rounded-full bg-[#c8bdb5]" />
+
+              <span className="text-xs text-[#999]">موجود در فروشگاه</span>
+            </div>
+
+            {/* نام محصول */}
+            <h1 className="max-w-2xl text-2xl font-extrabold leading-[1.8] tracking-tight text-[#202020] sm:text-3xl lg:text-[34px]">
               {product.name}
             </h1>
 
-            {/* امتیاز و کد */}
-            <div className="mt-3 flex items-center justify-start gap-3 text-sm text-[#777]">
-
-
-              <span className="flex items-center gap-1">
+            {/* امتیاز */}
+            <div className="mt-4 flex items-center justify-start gap-4">
+              <span className="flex items-center gap-1.5 rounded-full bg-[#f7f2eb] px-3.5 py-1.5 text-sm font-bold text-[#8b6a48]">
                 ۴.۹
-                <FiStar
-                  size={17}
-                  className="fill-[#b88b58] text-[#b88b58]"
-                />
+                <FiStar size={16} className="fill-[#b88b58] text-[#b88b58]" />
               </span>
+
+              <span className="text-xs text-[#999]">رضایت مشتریان</span>
             </div>
 
-            {/* توضیحات کوتاه */}
+            {/* خط جداکننده */}
+            <div className="my-6 h-px w-full bg-[#eee5dc]" />
+
+            {/* توضیحات */}
             <div
-              className="mt-7 text-[15px] leading-8 text-[#666]"
+              className="max-w-2xl text-[15px] leading-8 text-[#686868]"
               dangerouslySetInnerHTML={{
-                __html: product.description,
+                __html: product.description ?? "",
               }}
             />
 
             {/* قیمت */}
-            <div className="mt-7 flex items-center justify-start gap-3">
-              <span className="text-2xl font-extrabold text-[#222]">
-                {product.price.toLocaleString("fa-IR")} تومان
-              </span>
+            <div className="mt-8 rounded-[22px] border border-[#eee4da] bg-white px-5 py-5">
+              <p className="mb-2 text-xs text-[#999]">قیمت محصول</p>
+
+              <div className="flex items-end justify-start gap-2">
+                <span className="text-2xl font-extrabold tracking-tight text-[#222] sm:text-3xl">
+                  {product.price.toLocaleString("fa-IR")}
+                </span>
+
+                <span className="mb-1 text-sm font-medium text-[#777]">
+                  تومان
+                </span>
+              </div>
             </div>
 
             {/* موجودی */}
-            <div className="mt-4 flex items-center justify-start gap-2 text-sm">
+            <div className="mt-5 flex items-center justify-start gap-2">
               <span
-                className={`h-2 w-2 rounded-full ${
-                  isOutOfStock
-                    ? "bg-red-500"
-                    : "bg-[#78876c]"
+                className={`h-2.5 w-2.5 rounded-full ${
+                  isOutOfStock ? "bg-red-500" : "bg-[#78876c]"
                 }`}
               />
 
-              <span className="text-[#777]">
+              <span className="text-sm text-[#666]">
                 {isOutOfStock
-                  ? "ناموجود"
-                  : `موجود در انبار - ${product.quantity} عدد`}
+                  ? "این محصول در حال حاضر ناموجود است"
+                  : `موجود در انبار — ${product.quantity} عدد`}
               </span>
             </div>
 
             {/* دسته بندی */}
             <div className="mt-6">
-              <p className="mb-3 text-sm font-bold text-[#333]">
-                مناسب برای
-              </p>
+              <p className="mb-3 text-sm font-bold text-[#333]">مناسب برای</p>
 
-              <span className="inline-flex rounded-full bg-[#f4f0eb] px-4 py-2 text-xs text-[#555]">
-                همه انواع
+              <span className="inline-flex rounded-full border border-[#e7ddd3] bg-white px-5 py-2 text-xs font-medium text-[#666]">
+                همه انواع پوست
               </span>
             </div>
 
-            {/* خرید */}
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row-reverse">
+            {/* ================= خرید ================= */}
+            <div className="mt-7 rounded-[24px] border border-[#eee5dc] bg-white p-4 shadow-[0_8px_30px_rgba(70,45,30,0.04)] sm:p-5">
+              <div className="flex w-full flex-col gap-3 sm:flex-row-reverse">
+                {/* تعداد */}
+                <div className="flex h-13 w-full shrink-0 items-center justify-between rounded-full border border-[#e1d8d0] bg-[#fcfaf7] px-5 sm:w-30">
+                  <button
+                    type="button"
+                    onClick={increaseQuantity}
+                    disabled={isOutOfStock || quantity >= product.quantity}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-xl text-[#555] transition hover:bg-white hover:text-[#7c243d] disabled:text-[#ccc]"
+                  >
+                    +
+                  </button>
 
-              {/* تعداد */}
-              <div className="flex h-13 items-center justify-between rounded-full border border-[#ddd] px-4 sm:w-32">
+                  <span className="text-sm font-bold text-[#333]">
+                    {quantity}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={decreaseQuantity}
+                    disabled={quantity <= 1}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-xl text-[#555] transition hover:bg-white hover:text-[#7c243d] disabled:text-[#ccc]"
+                  >
+                    −
+                  </button>
+                </div>
+
+                {/* افزودن به سبد */}
                 <button
                   type="button"
-                  onClick={increaseQuantity}
-                  disabled={
-                    isOutOfStock ||
-                    quantity >= product.quantity
-                  }
-                  className="text-xl disabled:text-[#ccc]"
+                  disabled={isOutOfStock}
+                  className="flex h-13 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-[#7c243d] px-5 font-bold text-white shadow-[0_8px_20px_rgba(124,36,61,0.18)] transition duration-200 hover:bg-[#681f34] hover:shadow-[0_10px_25px_rgba(124,36,61,0.24)] disabled:cursor-not-allowed disabled:bg-[#ccc] disabled:shadow-none"
                 >
-                  +
+                  <FiShoppingBag size={18} />
+
+                  <span>افزودن به سبد خرید</span>
                 </button>
 
-                <span className="font-medium">
-                  {quantity}
-                </span>
-
+                {/* خرید سریع */}
                 <button
                   type="button"
-                  onClick={decreaseQuantity}
-                  disabled={quantity <= 1}
-                  className="text-xl disabled:text-[#ccc]"
+                  disabled={isOutOfStock}
+                  className="h-13 w-full shrink-0 rounded-full border border-[#d8cec5] bg-white px-6 font-bold text-[#333] transition duration-200 hover:border-[#7c243d] hover:text-[#7c243d] disabled:text-[#aaa] sm:w-auto"
                 >
-                  −
+                  خرید سریع
                 </button>
               </div>
-
-              {/* افزودن به سبد */}
-              <button
-                type="button"
-                disabled={isOutOfStock}
-                className="flex h-13 flex-1 items-center justify-center gap-2 rounded-full bg-[#7c243d] font-bold text-white shadow-lg shadow-[#7c243d]/15 transition hover:bg-[#681f34] disabled:cursor-not-allowed disabled:bg-[#ccc]"
-              >
-                <FiShoppingBag size={18} />
-                افزودن به سبد خرید
-              </button>
-
-              {/* خرید سریع */}
-              <button
-                type="button"
-                disabled={isOutOfStock}
-                className="h-13 rounded-full border border-[#cfc5bb] px-7 font-bold text-[#333] transition hover:border-[#7c243d] hover:text-[#7c243d] disabled:text-[#aaa]"
-              >
-                خرید سریع
-              </button>
             </div>
 
-            {/* ارسال */}
-            <div className="mt-4 flex items-center justify-start gap-2 rounded-2xl border border-[#dce3d7] bg-[#f3f6f0] px-5 py-4 text-sm text-[#66705e]">
-              <FiCheckCircle size={18} />
-              این انتخاب، شما را به ارسال رایگان می‌رساند.
-            </div>
-
-            {/* مزایا */}
-            <div className="mt-5 flex flex-wrap justify-start gap-x-8 gap-y-3 text-xs text-[#777]">
-
-              <div className="flex items-center gap-2">
-                <FiTruck size={16} />
-                آماده‌سازی و ارسال در ۱ تا ۳ روز کاری
+            {/* ================= ارسال رایگان ================= */}
+            <div className="mt-4 flex items-center gap-3 rounded-[20px] border border-[#dce3d7] bg-[#f3f6f0] px-5 py-4 text-sm text-[#66705e]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white">
+                <FiCheckCircle size={18} />
               </div>
 
-              <div className="flex items-center gap-2">
-                <FiRotateCcw size={16} />
-                بازگشت مطابق شرایط کالاهای بهداشتی
+              <span>این انتخاب، شما را به ارسال رایگان می‌رساند.</span>
+            </div>
+
+            {/* ================= مزایا ================= */}
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="flex items-center gap-3 rounded-[18px] border border-[#eee5dc] bg-white px-4 py-4">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f7f2eb] text-[#806d5b]">
+                  <FiTruck size={17} />
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-[#444]">ارسال سریع</p>
+
+                  <p className="mt-1 text-[11px] text-[#999]">
+                    ۱ تا ۳ روز کاری
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-[18px] border border-[#eee5dc] bg-white px-4 py-4">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f7f2eb] text-[#806d5b]">
+                  <FiRotateCcw size={17} />
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-[#444]">امکان بازگشت</p>
+
+                  <p className="mt-1 text-[11px] text-[#999]">
+                    مطابق شرایط کالا
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* علاقه مندی / اشتراک گذاری */}
-            <div className="mt-6 flex justify-start gap-8 border-t border-[#eee] pt-5">
-
+            {/* ================= علاقه مندی / اشتراک گذاری ================= */}
+            <div className="mt-6 flex flex-wrap items-center justify-start gap-x-8 gap-y-4 border-t border-[#eee5dc] pt-5">
               <button
                 type="button"
-                className="flex items-center gap-2 text-sm font-bold text-[#333] hover:text-[#7c243d]"
+                className="group flex items-center gap-2 text-sm font-bold text-[#444] transition hover:text-[#7c243d]"
               >
-                ذخیره در علاقه‌مندی
-                <FiHeart size={19} />
+                <span>ذخیره در علاقه‌مندی</span>
+
+                <FiHeart
+                  size={19}
+                  className="transition-transform group-hover:scale-110"
+                />
               </button>
 
               <button
                 type="button"
-                className="flex items-center gap-2 text-sm font-bold text-[#333] hover:text-[#7c243d]"
+                className="group flex items-center gap-2 text-sm font-bold text-[#444] transition hover:text-[#7c243d]"
               >
-                اشتراک‌گذاری
-                <FiShare2 size={18} />
-              </button>
+                <span>اشتراک‌گذاری</span>
 
+                <FiShare2
+                  size={18}
+                  className="transition-transform group-hover:scale-110"
+                />
+              </button>
             </div>
           </div>
         </div>

@@ -10,7 +10,8 @@ import { getProducts, updateProductInventory } from "@/api/product";
 
 export default function InventoryPage() {
   const queryClient = useQueryClient();
-
+  const [savedProductIds, setSavedProductIds] =
+  useState<number[]>([]);
   const [page, setPage] = useState(1);
   const [changes, setChanges] = useState<
     {
@@ -43,18 +44,36 @@ export default function InventoryPage() {
   const handleSave = async () => {
     if (changes.length === 0) return;
 
-    try {
-      await Promise.all(
-        changes.map((change) => updateMutation.mutateAsync(change))
-      );
+    setSavedProductIds([]);
 
-      setChanges([]);
+    const results = await Promise.allSettled(
+      changes.map(async (change) => {
+        await updateMutation.mutateAsync(change);
 
+        // این محصول با موفقیت ذخیره شد
+        setSavedProductIds((prev) =>
+          prev.includes(change.id) ? prev : [...prev, change.id]
+        );
+
+        // حذف محصول ذخیره‌شده از لیست تغییرات
+        setChanges((prev) => prev.filter((item) => item.id !== change.id));
+      })
+    );
+
+    const hasSuccess = results.some((result) => result.status === "fulfilled");
+
+    if (hasSuccess) {
       await queryClient.invalidateQueries({
         queryKey: ["inventory"],
       });
-    } catch (error) {
-      console.error("Inventory update error:", error);
+    }
+
+    const failedResults = results.filter(
+      (result) => result.status === "rejected"
+    );
+
+    if (failedResults.length > 0) {
+      console.error("بعضی محصولات ذخیره نشدند:", failedResults);
     }
   };
 
@@ -99,7 +118,11 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      <InventoryTable products={products} onChangesChange={setChanges} />
+      <InventoryTable
+        products={products}
+        onChangesChange={setChanges}
+        savedProductIds={savedProductIds}
+      />
 
       <Pagination page={page} totalPages={totalPages} setPage={setPage} />
     </div>
