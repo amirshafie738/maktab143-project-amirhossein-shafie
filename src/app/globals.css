@@ -140,3 +140,26 @@
     @apply font-sans;
     }
 }
+
+.hero-slider .swiper-button-prev::after,
+.hero-slider .swiper-button-next::after {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #333 !important;
+}
+
+.hero-slider .swiper-button-prev {
+  right: 24px !important;
+  left: auto !important;
+}
+
+.hero-slider .swiper-button-next {
+  left: 24px !important;
+  right: auto !important;
+}
+
+.hero-slider .swiper-button-prev:hover,
+.hero-slider .swiper-button-next:hover {
+  background: #fff !important;
+  transform: scale(1.08);
+}

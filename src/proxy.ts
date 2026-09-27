@@ -6,30 +6,34 @@ import {
 export async function proxy(
   request: NextRequest
 ) {
-  const pathname =
-    request.nextUrl.pathname;
+  const pathname = request.nextUrl.pathname;
 
-  // صفحه لاگین آزاد است
+  const token =
+    request.cookies.get("accessToken")?.value;
+
+  // اگر کاربر قبلاً لاگین کرده
+  // و دوباره وارد صفحه login شد
+  if (pathname === "/admin/login" && token) {
+    return NextResponse.redirect(
+      new URL("/admin", request.url)
+    );
+  }
+
+  // اگر کاربر لاگین نکرده،
+  // اجازه نمایش صفحه login را بده
   if (pathname === "/admin/login") {
     return NextResponse.next();
   }
 
-  // گرفتن Access Token از Cookie
-  const token =
-    request.cookies.get("accessToken")?.value;
-
-  // اگر اصلاً Token نداریم
+  // برای سایر صفحات admin
+  // اگر token نداریم → login
   if (!token) {
     return NextResponse.redirect(
-      new URL(
-        "/admin/login",
-        request.url
-      )
+      new URL("/admin/login", request.url)
     );
   }
 
-  // فقط وجود Cookie را بررسی می‌کنیم
-  // اعتبار Token را Axios و Backend مدیریت می‌کنند
+  // token داریم → اجازه ورود
   return NextResponse.next();
 }
 

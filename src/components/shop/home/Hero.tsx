@@ -8,7 +8,7 @@ import {
 
 export default function Hero() {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-8">
+    <section className="mx-auto max-w-7xl px-6 py-8">
       <div
         className="relative min-h-screen overflow-hidden rounded-3xl bg-cover bg-center"
         style={{

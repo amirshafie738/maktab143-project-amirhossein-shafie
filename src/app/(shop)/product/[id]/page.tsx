@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProduct } from "@/api/product";
 import ProductCart from "@/components/shop/prodduct/ProductCart";
-import ProductDetails from "@/components/shop/prodduct/productDetails";
+import ProductDetails from "@/components/shop/prodduct/ProductDetails";
 
 
 

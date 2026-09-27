@@ -16,28 +16,11 @@ export default function ProductDetails({
 
   return (
     <section className="mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="grid gap-10 lg:grid-cols-[400px_1fr]">
-        {/* انتخاب مطمئن */}
-        <div className="order-2 rounded-[25px] border border-[#e5ddd5] bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] lg:order-1">
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#fff8f5] text-[#7c243d]">
-              <FiShield size={25} />
-            </div>
-
-            <h3 className="text-xl font-extrabold text-[#222]">
-              انتخاب مطمئن
-            </h3>
-
-            <p className="mt-5 text-sm leading-8 text-[#666]">
-              اطلاعات محصول از برچسب و منابع برند گردآوری می‌شود.
-              ترکیبات ممکن است تغییر کنند؛ همیشه بسته‌بندی نهایی را
-              بررسی کنید.
-            </p>
-          </div>
-        </div>
+      <div className="flex flex-col gap-10 lg:flex-row">
+      
 
         {/* جزئیات محصول */}
-        <div className="order-1 text-right lg:order-2">
+        <div className="min-w-0 flex-1 text-right">
           <h2 className="text-3xl font-extrabold text-[#222]">
             جزئیات محصول
           </h2>
@@ -49,7 +32,6 @@ export default function ProductDetails({
             }}
           />
 
-          {/* ویژگی‌ها */}
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {features.map((feature) => (
               <div
@@ -66,6 +48,25 @@ export default function ProductDetails({
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+
+          {/* انتخاب مطمئن */}
+          <div className="w-full shrink-0 rounded-[25px] border border-[#e5ddd5] bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] lg:w-1/4">
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#fff8f5] text-[#7c243d]">
+              <FiShield size={25} />
+            </div>
+
+            <h3 className="text-xl font-extrabold text-[#222]">
+              انتخاب مطمئن
+            </h3>
+
+            <p className="mt-5 text-sm leading-8 text-[#666]">
+              اطلاعات محصول از برچسب و منابع برند گردآوری می‌شود.
+              ترکیبات ممکن است تغییر کنند؛ همیشه بسته‌بندی نهایی را
+              بررسی کنید.
+            </p>
           </div>
         </div>
       </div>

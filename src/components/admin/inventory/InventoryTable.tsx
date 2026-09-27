@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Product } from "@/types/product";
 
 // نوع تغییرات موجودی
-type InventoryChange = {
+export type InventoryChange = {
   id: number;
   price: number;
   quantity: number;
@@ -14,79 +14,136 @@ type InventoryChange = {
 type InventoryTableProps = {
   products: Product[];
   onChangesChange: (changes: InventoryChange[]) => void;
+
+  // محصولاتی که با موفقیت ذخیره شده‌اند
+  savedProductIds: number[];
 };
 
 export default function InventoryTable({
   products,
   onChangesChange,
+  savedProductIds,
 }: InventoryTableProps) {
-
-  // محصول و فیلد در حال ویرایش
-  const [editing, setEditing] = useState<{
-    id: number;
-    field: "price" | "quantity";
-  } | null>(null);
-
-  // نگهداری تغییرات موقت
-  const [draftValues, setDraftValues] = useState<
-    Record<number, { price: number; quantity: number }>
+  // مشخص می‌کند کدام فیلدها در حالت ویرایش هستند
+  const [editing, setEditing] = useState<
+    Record<
+      number,
+      {
+        price?: boolean;
+        quantity?: boolean;
+      }
+    >
   >({});
+
+  // مقدار موقت قیمت و موجودی
+  const [draftValues, setDraftValues] = useState<
+    Record<
+      number,
+      {
+        price: number;
+        quantity: number;
+      }
+    >
+  >({});
+
+  // بعد از ذخیره موفق، Inputهای آن محصول بسته می‌شوند
+  useEffect(() => {
+    if (savedProductIds.length === 0) return;
+
+    setEditing((prev) => {
+      const updated = { ...prev };
+
+      savedProductIds.forEach((id) => {
+        delete updated[id];
+      });
+
+      return updated;
+    });
+
+    setDraftValues((prev) => {
+      const updated = { ...prev };
+
+      savedProductIds.forEach((id) => {
+        delete updated[id];
+      });
+
+      return updated;
+    });
+  }, [savedProductIds]);
 
   // گرفتن مقدار فعلی
   const getValue = (
     product: Product,
     field: "price" | "quantity"
   ) => {
-    return draftValues[product.id]?.[field] ?? product[field];
+    return (
+      draftValues[product.id]?.[field] ??
+      product[field]
+    );
   };
 
-  // شروع ویرایش
+  // شروع ویرایش یک فیلد
   const startEditing = (
     product: Product,
     field: "price" | "quantity"
   ) => {
+    // مقدار اولیه را در draft قرار می‌دهیم
     setDraftValues((prev) => ({
       ...prev,
       [product.id]: {
-        price: prev[product.id]?.price ?? product.price,
+        price:
+          prev[product.id]?.price ??
+          product.price,
+
         quantity:
-          prev[product.id]?.quantity ?? product.quantity,
+          prev[product.id]?.quantity ??
+          product.quantity,
       },
     }));
 
-    setEditing({
-      id: product.id,
-      field,
-    });
+    // فقط همان فیلد را وارد حالت ویرایش می‌کنیم
+    setEditing((prev) => ({
+      ...prev,
+      [product.id]: {
+        ...prev[product.id],
+        [field]: true,
+      },
+    }));
   };
 
-  // تغییر مقدار قیمت یا موجودی
+  // تغییر مقدار Input
   const handleChange = (
     product: Product,
     field: "price" | "quantity",
     value: number
   ) => {
     const currentPrice =
-      draftValues[product.id]?.price ?? product.price;
+      draftValues[product.id]?.price ??
+      product.price;
 
     const currentQuantity =
-      draftValues[product.id]?.quantity ?? product.quantity;
+      draftValues[product.id]?.quantity ??
+      product.quantity;
 
-    // ساخت مقدار جدید
     const updated = {
-      price: field === "price" ? value : currentPrice,
+      price:
+        field === "price"
+          ? value
+          : currentPrice,
+
       quantity:
         field === "quantity"
           ? value
           : currentQuantity,
     };
 
+    // ذخیره مقدار جدید در draft
     setDraftValues((prev) => ({
       ...prev,
       [product.id]: updated,
     }));
 
-    // پیدا کردن محصولات تغییرکرده
+    // ساخت لیست محصولات تغییرکرده
     const changes = Object.entries({
       ...draftValues,
       [product.id]: updated,
@@ -101,42 +158,55 @@ export default function InventoryTable({
           (product) => product.id === change.id
         );
 
-        if (!originalProduct) return false;
+        if (!originalProduct) {
+          return false;
+        }
 
         return (
-          change.price !== originalProduct.price ||
-          change.quantity !== originalProduct.quantity
+          change.price !==
+            originalProduct.price ||
+          change.quantity !==
+            originalProduct.quantity
         );
       });
 
-    // ارسال تغییرات به والد
+    // ارسال تغییرات به InventoryPage
     onChangesChange(changes);
   };
 
-  // لغو تغییر با Escape
+  // لغو ویرایش با Escape
   const handleEscape = (
     product: Product,
     field: "price" | "quantity"
   ) => {
-    const currentValues = draftValues[product.id];
+    const currentValues =
+      draftValues[product.id];
 
     if (!currentValues) {
-      setEditing(null);
+      setEditing((prev) => ({
+        ...prev,
+        [product.id]: {
+          ...prev[product.id],
+          [field]: false,
+        },
+      }));
+
       return;
     }
 
-    // برگرداندن مقدار اصلی
+    // برگرداندن فقط همان فیلد به مقدار اصلی
     const updated = {
       ...currentValues,
       [field]: product[field],
     };
 
+    // ذخیره مقدار اصلاح‌شده
     setDraftValues((prev) => ({
       ...prev,
       [product.id]: updated,
     }));
 
-    // به‌روزرسانی لیست تغییرات
+    // دوباره لیست تغییرات را محاسبه می‌کنیم
     const changes = Object.entries({
       ...draftValues,
       [product.id]: updated,
@@ -151,30 +221,33 @@ export default function InventoryTable({
           (product) => product.id === change.id
         );
 
-        if (!originalProduct) return false;
+        if (!originalProduct) {
+          return false;
+        }
 
         return (
-          change.price !== originalProduct.price ||
-          change.quantity !== originalProduct.quantity
+          change.price !==
+            originalProduct.price ||
+          change.quantity !==
+            originalProduct.quantity
         );
       });
 
-    // ارسال تغییرات به والد
     onChangesChange(changes);
 
-    // خروج از حالت ویرایش
-    setEditing(null);
-  };
-
-  // پایان ویرایش
-  const finishEditing = () => {
-    setEditing(null);
+    // فقط همان Input بسته شود
+    setEditing((prev) => ({
+      ...prev,
+      [product.id]: {
+        ...prev[product.id],
+        [field]: false,
+      },
+    }));
   };
 
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
       <table className="w-full min-w-[700px] text-sm">
-
         {/* عنوان ستون‌ها */}
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
@@ -202,30 +275,36 @@ export default function InventoryTable({
 
         <tbody>
           {products.map((product, index) => {
+            // مقدار فعلی
+            const price = getValue(
+              product,
+              "price"
+            );
 
-            // گرفتن قیمت و موجودی فعلی
-            const price = getValue(product, "price");
-            const quantity = getValue(product, "quantity");
+            const quantity = getValue(
+              product,
+              "quantity"
+            );
 
-            // بررسی حالت ویرایش قیمت
+            // آیا قیمت در حال ویرایش است؟
             const isEditingPrice =
-              editing?.id === product.id &&
-              editing.field === "price";
+              editing[product.id]?.price === true;
 
-            // بررسی حالت ویرایش موجودی
+            // آیا موجودی در حال ویرایش است؟
             const isEditingQuantity =
-              editing?.id === product.id &&
-              editing.field === "quantity";
+              editing[product.id]?.quantity ===
+              true;
 
             return (
               <tr
                 key={product.id}
                 className="border-b border-slate-100 last:border-none"
               >
-
                 {/* شماره */}
                 <td className="px-4 py-4">
-                  {(index + 1).toLocaleString("fa-IR")}
+                  {(index + 1).toLocaleString(
+                    "fa-IR"
+                  )}
                 </td>
 
                 {/* نام محصول */}
@@ -240,36 +319,49 @@ export default function InventoryTable({
                       autoFocus
                       type="number"
                       value={price}
+                      className="w-32 rounded-lg border border-blue-500 px-3 py-2 outline-none"
                       onChange={(event) =>
                         handleChange(
                           product,
                           "price",
-                          Number(event.target.value)
+                          Number(
+                            event.target.value
+                          )
                         )
                       }
-                      onBlur={finishEditing}
                       onKeyDown={(event) => {
-                        // لغو با Escape
-                        if (event.key === "Escape") {
-                          handleEscape(product, "price");
+                        if (
+                          event.key === "Escape"
+                        ) {
+                          handleEscape(
+                            product,
+                            "price"
+                          );
                         }
 
-                        // پایان با Enter
-                        if (event.key === "Enter") {
-                          finishEditing();
+                        // Enter هیچ کاری نمی‌کند
+                        if (
+                          event.key === "Enter"
+                        ) {
+                          event.preventDefault();
                         }
                       }}
-                      className="w-32 rounded-lg border border-slate-400 px-2 py-1 outline-none focus:border-slate-700"
                     />
                   ) : (
                     <button
                       type="button"
                       onClick={() =>
-                        startEditing(product, "price")
+                        startEditing(
+                          product,
+                          "price"
+                        )
                       }
                       className="cursor-pointer text-blue-600 underline"
                     >
-                      {price.toLocaleString("fa-IR")} تومان
+                      {price.toLocaleString(
+                        "fa-IR"
+                      )}{" "}
+                      تومان
                     </button>
                   )}
                 </td>
@@ -282,36 +374,48 @@ export default function InventoryTable({
                       type="number"
                       min="0"
                       value={quantity}
+                      className="w-28 rounded-lg border border-blue-500 px-3 py-2 outline-none"
                       onChange={(event) =>
                         handleChange(
                           product,
                           "quantity",
-                          Number(event.target.value)
+                          Number(
+                            event.target.value
+                          )
                         )
                       }
-                      onBlur={finishEditing}
                       onKeyDown={(event) => {
-                        // لغو با Escape
-                        if (event.key === "Escape") {
-                          handleEscape(product, "quantity");
+                        if (
+                          event.key === "Escape"
+                        ) {
+                          handleEscape(
+                            product,
+                            "quantity"
+                          );
                         }
 
-                        // پایان با Enter
-                        if (event.key === "Enter") {
-                          finishEditing();
+                        // Enter هیچ کاری نمی‌کند
+                        if (
+                          event.key === "Enter"
+                        ) {
+                          event.preventDefault();
                         }
                       }}
-                      className="w-24 rounded-lg border border-slate-400 px-2 py-1 outline-none focus:border-slate-700"
                     />
                   ) : (
                     <button
                       type="button"
                       onClick={() =>
-                        startEditing(product, "quantity")
+                        startEditing(
+                          product,
+                          "quantity"
+                        )
                       }
                       className="cursor-pointer text-blue-600 underline"
                     >
-                      {quantity.toLocaleString("fa-IR")}
+                      {quantity.toLocaleString(
+                        "fa-IR"
+                      )}
                     </button>
                   )}
                 </td>
@@ -328,7 +432,6 @@ export default function InventoryTable({
                     </span>
                   )}
                 </td>
-
               </tr>
             );
           })}

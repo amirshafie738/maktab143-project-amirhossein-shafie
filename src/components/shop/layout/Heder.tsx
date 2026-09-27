@@ -42,7 +42,7 @@ useEffect(() => {
 
   return (
     <>
-      <header className="w-full bg-white">
+      <header className="w-full bg-white ">
         <div className="mx-auto flex h-19 max-w-8xl items-center justify-between px-4 lg:h-20 lg:px-6">
           {/* ================= MOBILE MENU ================= */}
           <button
