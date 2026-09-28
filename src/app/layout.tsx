@@ -1,9 +1,10 @@
+import QueryProvider from "@/providers/QueryProvider";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Vazirmatn } from "next/font/google";
-import { cn } from "@/lib/utils";
+import ReduxProvider from "@/providers/ReduxProvider";
 
-import QueryProvider from "@/providers/QueryProvider";
+
 
 const vazirmatn = Vazirmatn({
   subsets: ["arabic"],
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <body className={vazirmatn.className}>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <ReduxProvider>{children}</ReduxProvider>
+        </QueryProvider>
       </body>
     </html>
   );

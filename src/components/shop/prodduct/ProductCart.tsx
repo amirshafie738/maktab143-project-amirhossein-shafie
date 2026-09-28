@@ -14,6 +14,9 @@ import {
 
 import type { Product } from "@/types/product";
 import ProductSlider from "./ProductSlider";
+import { AppDispatch } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { addToCart } from "@/redux/reducer/cartSlice";
 
 type ProductCartProps = {
   product: Product;
@@ -23,6 +26,7 @@ export default function ProductCart({ product }: ProductCartProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
+  const dispatch = useDispatch<AppDispatch>();
   const images =
     product.image?.length > 0
       ? product.image
@@ -173,6 +177,14 @@ export default function ProductCart({ product }: ProductCartProps) {
                   type="button"
                   disabled={isOutOfStock}
                   className="flex h-13 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-[#7c243d] px-5 font-bold text-white shadow-[0_8px_20px_rgba(124,36,61,0.18)] transition duration-200 hover:bg-[#681f34] hover:shadow-[0_10px_25px_rgba(124,36,61,0.24)] disabled:cursor-not-allowed disabled:bg-[#ccc] disabled:shadow-none"
+                  onClick={() => {
+                    dispatch(
+                      addToCart({
+                        product,
+                        quantity: 1,
+                      })
+                    );
+                  }}
                 >
                   <FiShoppingBag size={18} />
 

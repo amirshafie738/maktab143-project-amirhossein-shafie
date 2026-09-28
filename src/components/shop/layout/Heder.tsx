@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FiMenu, FiSearch, FiShoppingBag, FiUser, FiX } from "react-icons/fi";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/redux/store";
 
 const menuItems = [
   {
@@ -34,11 +36,15 @@ export default function Heder() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-useEffect(() => {
-  const token = localStorage.getItem("accessToken");
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
-  setIsLoggedIn(!!token);
-}, []);
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    setIsLoggedIn(!!token);
+  }, []);
 
   return (
     <>
@@ -123,7 +129,7 @@ useEffect(() => {
               <FiShoppingBag size={23} />
 
               <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#7d2945] px-1 text-[10px] font-bold text-white">
-                0
+                {cartCount}
               </span>
             </Link>
 
