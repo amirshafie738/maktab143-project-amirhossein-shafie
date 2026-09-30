@@ -2,13 +2,24 @@
 
 import Link from "next/link";
 import { FiHeart, FiShoppingBag, FiStar } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+
 import type { Product } from "@/types/product";
+import type { RootState } from "@/redux/store";
+
+import { toggleFavorite } from "@/redux/reducer/favoriteSlice";
 
 type ProductCardProps = {
   product: Product;
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const dispatch = useDispatch();
+
+  const isFavorite = useSelector((state: RootState) =>
+    state.favorite.items.some((item) => item.id === product.id)
+  );
+
   const imageUrl = product.thumbnail.startsWith("/files/")
     ? `http://localhost:3001${product.thumbnail}`
     : product.thumbnail;
@@ -32,19 +43,29 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* علاقه‌مندی */}
         <button
           type="button"
-          onClick={(event) => event.preventDefault()}
-          className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#333] shadow-sm transition hover:text-[#7c243d]"
-        >
-          <FiHeart size={21} />
-        </button>
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
 
+            dispatch(toggleFavorite(product));
+          }}
+          className={`cursor-pointer absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm transition ${
+            isFavorite
+              ? "text-red-500"
+              : "text-[#333] hover:text-[#7c243d]"
+          }`}
+        >
+          <FiHeart
+            size={21}
+            className={isFavorite ? "fill-current" : ""}
+          />
+        </button>
 
         {/* سبد خرید */}
         <button
           type="button"
           disabled={isOutOfStock}
-          className=" absolute bottom-3 right-3 flex h-12 w-12 items-center justify-center  rounded-full bg-[#7c243d] text-white shadow-md opacity-0
-            translate-y-3 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-[#681f34] disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="absolute bottom-3 right-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#7c243d] text-white shadow-md opacity-0 translate-y-3 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-[#681f34] disabled:cursor-not-allowed disabled:bg-gray-300"
         >
           <FiShoppingBag size={20} />
         </button>
@@ -59,7 +80,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center gap-1 text-sm text-[#999]">
             <span>{product.rating}</span>
 
-            <FiStar size={15} className="fill-[#b98a59] text-[#b98a59]" />
+            <FiStar
+              size={15}
+              className="fill-[#b98a59] text-[#b98a59]"
+            />
           </div>
         </div>
 

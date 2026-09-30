@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import cartReducer from "./reducer/cartSlice";
+import favoriteReducer from "./reducer/favoriteSlice";
 import storage from "redux-persist/es/storage";
 
 import {
@@ -14,18 +15,16 @@ import persistReducer from "redux-persist/es/persistReducer";
 
 const rootReducer = combineReducers({
   cart: cartReducer,
+  favorite: favoriteReducer,
 });
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["cart"],
+  whitelist: ["cart", "favorite"],
 };
 
-const persistedReducer = persistReducer(
-  persistConfig,
-  rootReducer
-);
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
@@ -33,14 +32,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [
-          FLUSH,
-          REHYDRATE,
-          PAUSE,
-          PURGE,
-          REGISTER,
-          PERSIST,
-        ],
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PURGE, REGISTER, PERSIST],
       },
     }),
 });
