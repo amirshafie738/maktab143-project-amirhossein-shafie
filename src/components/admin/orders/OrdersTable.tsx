@@ -5,12 +5,14 @@ type OrdersTableProps = {
   orders: Order[];
   sortOrder: "asc" | "desc";
   onSort: () => void;
+  onView: (order: Order) => void;
 };
 
 export default function OrdersTable({
   orders,
   sortOrder,
   onSort,
+  onView,
 }: OrdersTableProps) {
   const formatDate = (date: number) => {
     return new Intl.DateTimeFormat("fa-IR", {
@@ -62,7 +64,9 @@ export default function OrdersTable({
               key={order.id}
               className="border-b border-slate-100 last:border-none"
             >
-              <td className="px-4 py-4">{(index + 1).toLocaleString("fa-IR")}</td>
+              <td className="px-4 py-4">
+                {(index + 1).toLocaleString("fa-IR")}
+              </td>
 
               <td className="px-4 py-4 font-medium text-slate-700">
                 {order.username} {order.lastname}
@@ -91,6 +95,7 @@ export default function OrdersTable({
               <td className="px-4 py-4">
                 <button
                   type="button"
+                  onClick={() => onView(order)}
                   className="rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100"
                 >
                   مشاهده

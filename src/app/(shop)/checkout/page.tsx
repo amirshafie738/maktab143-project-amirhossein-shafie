@@ -23,9 +23,7 @@ import {
 export default function Checkout() {
   const router = useRouter();
 
-  const cartItems = useSelector(
-    (state: RootState) => state.cart.items
-  );
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
   const [submitError, setSubmitError] = useState("");
 
@@ -60,8 +58,7 @@ export default function Checkout() {
 
   // مبلغ نهایی
   const totalPrice = cartItems.reduce(
-    (total, item) =>
-      total + item.product.price * item.quantity,
+    (total, item) => total + item.product.price * item.quantity,
     0
   );
 
@@ -76,23 +73,24 @@ export default function Checkout() {
     onError: (error) => {
       console.error("Create order error:", error);
 
-      setSubmitError(
-        "ثبت سفارش با خطا مواجه شد. دوباره تلاش کنید."
-      );
+      setSubmitError("ثبت سفارش با خطا مواجه شد. دوباره تلاش کنید.");
     },
   });
 
   // ارسال فرم
-  const handleSubmitForm = async (
-    data: CheckoutFormValues
-  ) => {
+  // ارسال فرم
+  const handleSubmitForm = async (data: CheckoutFormValues) => {
     setSubmitError("");
 
-    const deliveryDateObject = new DateObject({
-      date: data.deliveryDate,
-      calendar: persian,
-    });
+    const englishDate = data.deliveryDate.replace(/[۰-۹]/g, (digit) =>
+      String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))
+    );
 
+    const deliveryDateObject = new DateObject({
+      date: englishDate,
+      calendar: persian,
+      format: "YYYY/MM/DD",
+    });
     await createOrderMutation.mutateAsync({
       username: data.firstName,
       lastname: data.lastName,
@@ -230,14 +228,10 @@ export default function Checkout() {
                 format="YYYY/MM/DD"
                 value={deliveryDate}
                 onChange={(date) => {
-                  setValue(
-                    "deliveryDate",
-                    date?.format("YYYY/MM/DD") ?? "",
-                    {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                    }
-                  );
+                  setValue("deliveryDate", date?.format("YYYY/MM/DD") ?? "", {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
                 }}
                 inputClass="h-12 w-full rounded-xl border border-[#ddd5ce] bg-white px-4 text-right text-sm outline-none transition focus:border-[#7c243d]"
                 placeholder="تاریخ تحویل را انتخاب کنید"
@@ -254,9 +248,7 @@ export default function Checkout() {
             <div className="mt-5">
               <label className="mb-2 block text-sm font-bold text-[#333]">
                 توضیحات سفارش{" "}
-                <span className="font-normal text-gray-400">
-                  (اختیاری)
-                </span>
+                <span className="font-normal text-gray-400">(اختیاری)</span>
               </label>
 
               <textarea
@@ -270,9 +262,7 @@ export default function Checkout() {
             {/* دکمه پرداخت */}
             <div className="mt-8 border-t border-[#eee7e1] pt-6">
               {submitError && (
-                <p className="mb-4 text-sm text-red-500">
-                  {submitError}
-                </p>
+                <p className="mb-4 text-sm text-red-500">{submitError}</p>
               )}
 
               <div className="flex justify-end">
@@ -298,9 +288,7 @@ export default function Checkout() {
             <div className="mt-6 space-y-5 text-sm">
               {/* جمع کالاها */}
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">
-                  جمع کالاها
-                </span>
+                <span className="text-gray-500">جمع کالاها</span>
 
                 <span className="font-bold text-[#333]">
                   {totalPrice.toLocaleString("fa-IR")} تومان
@@ -309,33 +297,23 @@ export default function Checkout() {
 
               {/* تخفیف */}
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">
-                  تخفیف
-                </span>
+                <span className="text-gray-500">تخفیف</span>
 
-                <span className="font-bold text-[#333]">
-                  —
-                </span>
+                <span className="font-bold text-[#333]">—</span>
               </div>
 
               {/* ارسال */}
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">
-                  ارسال
-                </span>
+                <span className="text-gray-500">ارسال</span>
 
-                <span className="font-bold text-[#333]">
-                  رایگان
-                </span>
+                <span className="font-bold text-[#333]">رایگان</span>
               </div>
             </div>
 
             {/* مبلغ نهایی */}
             <div className="mt-6 border-t border-[#eee7e1] pt-5">
               <div className="flex items-center justify-between">
-                <span className="font-extrabold text-[#333]">
-                  مبلغ نهایی
-                </span>
+                <span className="font-extrabold text-[#333]">مبلغ نهایی</span>
 
                 <span className="text-lg font-extrabold text-[#7c243d]">
                   {totalPrice.toLocaleString("fa-IR")} تومان
@@ -344,8 +322,7 @@ export default function Checkout() {
             </div>
 
             <p className="mt-5 text-xs leading-6 text-gray-400">
-              مبلغ نهایی بر اساس قیمت و موجودی فعلی محصولات
-              محاسبه می‌شود.
+              مبلغ نهایی بر اساس قیمت و موجودی فعلی محصولات محاسبه می‌شود.
             </p>
           </aside>
         </div>

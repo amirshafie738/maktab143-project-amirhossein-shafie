@@ -55,6 +55,19 @@ export async function updateOrderPaymentStatus(
   return response.data;
 }
 
+// تغییر وضعیت تحویل سفارش
+export async function updateOrderDeliveryStatus(
+  id: number,
+  delivered: boolean
+): Promise<Order> {
+  const response = await api.patch<Order>(
+    `/orders/${id}`,
+    { delivered }
+  );
+
+  return response.data;
+}
+
 // دریافت یک سفارش
 export async function getOrder(
   id: number

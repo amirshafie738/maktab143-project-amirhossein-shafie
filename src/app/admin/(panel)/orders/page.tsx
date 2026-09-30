@@ -8,12 +8,16 @@ import OrdersTable from "@/components/admin/orders/OrdersTable";
 import Pagination from "@/components/Pagination/Pagination";
 
 import { getOrders } from "@/api/orders";
+import { Order } from "@/types/order";
+import OrderDetailsModal from "@/components/admin/orders/OrderDetailsModal";
 
 type OrderFilter = "true" | "false";
 type SortOrder = "desc" | "asc";
 
 export default function OrdersPage() {
   const [page, setPage] = useState(1);
+
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // پیشفرض: سفارش‌های تحویل نشده
   const [delivered, setDelivered] = useState<OrderFilter>("false");
@@ -113,10 +117,19 @@ export default function OrdersPage() {
         orders={orders}
         sortOrder={sortOrder}
         onSort={handleSortChange}
+        onView={setSelectedOrder}
       />
 
       {/* Pagination */}
       <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+
+      {/* مودال */}
+      {selectedOrder && (
+        <OrderDetailsModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
     </div>
   );
 }
