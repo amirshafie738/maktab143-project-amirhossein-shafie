@@ -1,29 +1,40 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
 
 import type { RootState } from "@/redux/store";
+import { createOrder } from "@/api/orders";
+
 import {
   checkoutSchema,
   type CheckoutFormValues,
 } from "@/schemas/checkoutSchema";
 
 export default function Checkout() {
+  const router = useRouter();
+
   const cartItems = useSelector(
     (state: RootState) => state.cart.items
   );
 
-  // تاریخ مجاز تحویل
+  const [submitError, setSubmitError] = useState("");
+
+  // تاریخ امروز
   const today = new DateObject({
     calendar: persian,
   });
 
+  // حداقل سه روز بعد
   const minDeliveryDate = new DateObject(today).add(3, "days");
 
   const {
@@ -34,6 +45,7 @@ export default function Checkout() {
     formState: { errors },
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
+
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -46,25 +58,70 @@ export default function Checkout() {
 
   const deliveryDate = watch("deliveryDate");
 
-  // محاسبه مبلغ نهایی
+  // مبلغ نهایی
   const totalPrice = cartItems.reduce(
     (total, item) =>
       total + item.product.price * item.quantity,
     0
   );
 
+  // ایجاد سفارش
+  const createOrderMutation = useMutation({
+    mutationFn: createOrder,
+
+    onSuccess: (order) => {
+      router.push(`/payment?orderId=${order.id}`);
+    },
+
+    onError: (error) => {
+      console.error("Create order error:", error);
+
+      setSubmitError(
+        "ثبت سفارش با خطا مواجه شد. دوباره تلاش کنید."
+      );
+    },
+  });
+
   // ارسال فرم
-  const handleSubmitForm = (
+  const handleSubmitForm = async (
     data: CheckoutFormValues
   ) => {
-    console.log("Checkout data:", data);
+    setSubmitError("");
+
+    const deliveryDateObject = new DateObject({
+      date: data.deliveryDate,
+      calendar: persian,
+    });
+
+    await createOrderMutation.mutateAsync({
+      username: data.firstName,
+      lastname: data.lastName,
+      phone: data.phone,
+      address: data.address,
+
+      expectAt: deliveryDateObject.toDate().getTime(),
+
+      products: cartItems.map((item) => ({
+        id: item.product.id,
+        name: item.product.name,
+        count: String(item.quantity),
+        price: String(item.product.price),
+        image: item.product.thumbnail,
+      })),
+
+      prices: totalPrice,
+
+      delivered: false,
+
+      paymentStatus: "pending",
+    });
   };
 
   return (
     <main className="min-h-screen bg-[#fcfaf8]">
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
-          {/* فرم اطلاعات */}
+          {/* فرم */}
           <form
             onSubmit={handleSubmit(handleSubmitForm)}
             className="rounded-[25px] border border-[#e5ddd5] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] sm:p-8"
@@ -211,17 +268,28 @@ export default function Checkout() {
             </div>
 
             {/* دکمه پرداخت */}
-            <div className="mt-8 flex justify-end border-t border-[#eee7e1] pt-6">
-              <button
-                type="submit"
-                className="rounded-full bg-[#7c243d] px-10 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#681f34]"
-              >
-                پرداخت
-              </button>
+            <div className="mt-8 border-t border-[#eee7e1] pt-6">
+              {submitError && (
+                <p className="mb-4 text-sm text-red-500">
+                  {submitError}
+                </p>
+              )}
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={createOrderMutation.isPending}
+                  className="rounded-full bg-[#7c243d] px-10 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#681f34] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {createOrderMutation.isPending
+                    ? "در حال ثبت سفارش..."
+                    : "پرداخت"}
+                </button>
+              </div>
             </div>
           </form>
 
-          {/* خلاصه پرداخت */}
+          {/* خلاصه سفارش */}
           <aside className="h-fit rounded-[25px] border border-[#e5ddd5] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
             <h2 className="text-lg font-extrabold text-[#292929]">
               خلاصه پرداخت

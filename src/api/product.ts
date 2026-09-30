@@ -118,3 +118,25 @@ export async function updateProductInventory(
 
   return response.data;
 }
+
+// کم کردن موجودی محصول
+export async function decreaseProductQuantity(
+  id: number,
+  count: number
+): Promise<Product> {
+  const product = await getProduct(id);
+
+  const newQuantity = Math.max(
+    0,
+    product.quantity - count
+  );
+
+  const response = await api.patch<Product>(
+    `/products/${id}`,
+    {
+      quantity: newQuantity,
+    }
+  );
+
+  return response.data;
+}

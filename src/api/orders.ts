@@ -1,6 +1,24 @@
 import { api } from "./axios";
 import type { Order } from "@/types/order";
 
+export type CreateOrderData = {
+  username: string;
+  lastname: string;
+  address: string;
+  phone: string;
+  expectAt: number;
+  products: {
+    id: number;
+    name: string;
+    count: string;
+    price: string;
+    image: string;
+  }[];
+  prices: number;
+  delivered: boolean;
+  paymentStatus: "pending" | "success" | "failed";
+};
+
 type GetOrdersParams = {
   page?: number;
   limit?: number;
@@ -13,6 +31,42 @@ type OrdersResponse = {
   total: number;
 };
 
+// ایجاد سفارش
+export async function createOrder(
+  data: CreateOrderData
+): Promise<Order> {
+  const response = await api.post<Order>("/orders", data);
+
+  return response.data;
+}
+
+// تغییر وضعیت پرداخت
+export async function updateOrderPaymentStatus(
+  id: number,
+  paymentStatus: "success" | "failed"
+): Promise<Order> {
+  const response = await api.patch<Order>(
+    `/orders/${id}`,
+    {
+      paymentStatus,
+    }
+  );
+
+  return response.data;
+}
+
+// دریافت یک سفارش
+export async function getOrder(
+  id: number
+): Promise<Order> {
+  const response = await api.get<Order>(
+    `/orders/${id}`
+  );
+
+  return response.data;
+}
+
+// دریافت لیست سفارش‌ها
 export async function getOrders({
   page = 1,
   limit = 5,
@@ -37,4 +91,9 @@ export async function getOrders({
     data: response.data,
     total: Number(response.headers["x-total-count"]),
   };
+}
+
+// حذف سفارش
+export async function deleteOrder(id: number): Promise<void> {
+  await api.delete(`/orders/${id}`);
 }

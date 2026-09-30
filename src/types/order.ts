@@ -17,4 +17,5 @@ export type OrderProduct = {
     prices: number;
     delivered: string;
     createdAt: number;
+    paymentStatus: "pending" | "success" | "failed";
   };
