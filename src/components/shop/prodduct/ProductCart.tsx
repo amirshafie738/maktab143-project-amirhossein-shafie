@@ -27,7 +27,7 @@ type ProductCartProps = {
 };
 
 export default function ProductCart({ product }: ProductCartProps) {
-  const [selectedImage, setSelectedImage] = useState(0);
+
   const [quantity, setQuantity] = useState(1);
 
   const dispatch = useDispatch<AppDispatch>();

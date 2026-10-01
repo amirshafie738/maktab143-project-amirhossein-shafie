@@ -24,7 +24,7 @@ export default function OrdersTable({
 
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-      <table className="w-full min-w-[1000px] text-sm">
+      <table className="w-full min-w-250 text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
             <th className="px-4 py-4 text-right font-semibold">#</th>
