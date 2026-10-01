@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 
-import { deleteOrder, getOrder } from "@/api/orders";
+import { deleteOrder, getOrder, updateOrderPaymentStatus } from "@/api/orders";
 
 export default function ResultPage() {
   const searchParams = useSearchParams();
@@ -98,12 +98,17 @@ export default function ResultPage() {
               بازگشت به فروشگاه
             </button>
             {!isSuccess && (
-              <Link
-                href={`/payment?orderId=${order.id}`}
+              <button
+                type="button"
+                onClick={async () => {
+                  await updateOrderPaymentStatus(order.id, "pending");
+
+                  window.location.href = `/payment?orderId=${order.id}`;
+                }}
                 className="rounded-full border border-[#ddd5ce] px-8 py-3 text-sm font-bold text-[#555] transition hover:bg-gray-50"
               >
                 تلاش دوباره
-              </Link>
+              </button>
             )}
           </div>
         </div>

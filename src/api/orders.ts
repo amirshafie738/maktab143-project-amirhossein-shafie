@@ -32,9 +32,7 @@ type OrdersResponse = {
 };
 
 // ایجاد سفارش
-export async function createOrder(
-  data: CreateOrderData
-): Promise<Order> {
+export async function createOrder(data: CreateOrderData): Promise<Order> {
   const response = await api.post<Order>("/orders", data);
 
   return response.data;
@@ -43,38 +41,25 @@ export async function createOrder(
 // تغییر وضعیت پرداخت
 export async function updateOrderPaymentStatus(
   id: number,
-  paymentStatus: "success" | "failed"
+  paymentStatus: "pending" | "success" | "failed"
 ): Promise<Order> {
-  const response = await api.patch<Order>(
-    `/orders/${id}`,
-    {
-      paymentStatus,
-    }
-  );
+  const response = await api.patch<Order>(`/orders/${id}`, { paymentStatus });
 
   return response.data;
 }
-
 // تغییر وضعیت تحویل سفارش
 export async function updateOrderDeliveryStatus(
   id: number,
   delivered: boolean
 ): Promise<Order> {
-  const response = await api.patch<Order>(
-    `/orders/${id}`,
-    { delivered }
-  );
+  const response = await api.patch<Order>(`/orders/${id}`, { delivered });
 
   return response.data;
 }
 
 // دریافت یک سفارش
-export async function getOrder(
-  id: number
-): Promise<Order> {
-  const response = await api.get<Order>(
-    `/orders/${id}`
-  );
+export async function getOrder(id: number): Promise<Order> {
+  const response = await api.get<Order>(`/orders/${id}`);
 
   return response.data;
 }
@@ -90,10 +75,8 @@ export async function getOrders({
     params: {
       _page: page,
       _limit: limit,
-
-      ...(delivered && {
-        delivered,
-      }),
+      paymentStatus: "success",
+      ...(delivered && { delivered}),
 
       _sort: "createdAt",
       _order: sortOrder,

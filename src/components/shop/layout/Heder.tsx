@@ -41,6 +41,8 @@ export default function Heder() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  //debounced
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
@@ -52,11 +54,19 @@ export default function Heder() {
 
     setIsLoggedIn(!!token);
   }, []);
+  //9۰۰ میلی‌ثانیه دوباره تایپ کرد، تایمر قبلی لغو میشه.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchValue);
+    }, 900);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
 
   // جستجوی محصولات
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
-    queryKey: ["search-products", searchValue],
-    queryFn: () => searchProducts(searchValue),
+    queryKey: ["search-products", debouncedSearch],
+    queryFn: () => searchProducts(debouncedSearch),
     enabled: isSearchOpen,
   });
 
@@ -123,7 +133,7 @@ export default function Heder() {
               <FiSearch size={21} className="shrink-0 text-[#777]" />
 
               <span className="mr-3 w-full text-right text-sm text-[#8b8580]">
-                جستجوی محصول، برند یا نیاز پوستی
+                جستجوی محصول، برند
               </span>
 
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white text-xs text-gray-400 shadow-sm">
@@ -182,11 +192,11 @@ export default function Heder() {
           {/* Overlay */}
           <div
             onClick={closeSearch}
-            className="fixed inset-0 z-[60] bg-black/35 backdrop-blur-[2px]"
+            className="fixed inset-0 z-60 bg-black/35 backdrop-blur-[2px]"
           />
 
           {/* Search Modal */}
-          <div className="fixed left-1/2 top-14 z-[70] w-[calc(100%-24px)] max-w-3xl -translate-x-1/2 overflow-hidden rounded-[28px] bg-white shadow-2xl">
+          <div className="fixed left-1/2 top-14 z-70 w-[calc(100%-24px)] max-w-3xl -translate-x-1/2 overflow-hidden rounded-[28px] bg-white shadow-2xl">
             {/* Search Header */}
             <div className="flex items-center gap-4 border-b border-[#eee9e3] px-5 py-5 sm:px-7">
               {/* بستن */}
@@ -205,7 +215,7 @@ export default function Heder() {
                   type="text"
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
-                  placeholder="جستجوی محصول، برند یا نیاز پوستی"
+                  placeholder="جستجوی محصول، برند "
                   className="w-full bg-transparent text-right text-sm text-[#333] outline-none placeholder:text-[#999]"
                 />
 
