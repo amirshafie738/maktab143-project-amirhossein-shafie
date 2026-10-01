@@ -80,10 +80,7 @@ export async function uploadProductImage(
 
   formData.append("thumbnail", file);
 
-  const response = await api.post<{ path: string }>(
-    "/upload",
-    formData
-  );
+  const response = await api.post<{ path: string }>("/upload", formData);
 
   return response.data;
 }
@@ -97,13 +94,14 @@ export async function uploadProductImages(
     formData.append("images", file);
   });
 
-  const response = await api.post<
-    { filename: string; path: string }[]
-  >("/upload-images", formData);
+  const response = await api.post<{ filename: string; path: string }[]>(
+    "/upload-images",
+    formData
+  );
 
   return response.data;
 }
-// مخصوص قیمت ومجودی 
+// مخصوص قیمت ومجودی
 export async function updateProductInventory(
   id: number,
   data: {
@@ -111,10 +109,7 @@ export async function updateProductInventory(
     quantity: number;
   }
 ): Promise<Product> {
-  const response = await api.patch<Product>(
-    `/products/${id}`,
-    data
-  );
+  const response = await api.patch<Product>(`/products/${id}`, data);
 
   return response.data;
 }
@@ -126,17 +121,34 @@ export async function decreaseProductQuantity(
 ): Promise<Product> {
   const product = await getProduct(id);
 
-  const newQuantity = Math.max(
-    0,
-    product.quantity - count
-  );
+  const newQuantity = Math.max(0, product.quantity - count);
 
-  const response = await api.patch<Product>(
-    `/products/${id}`,
-    {
-      quantity: newQuantity,
-    }
-  );
+  const response = await api.patch<Product>(`/products/${id}`, {
+    quantity: newQuantity,
+  });
 
   return response.data;
+}
+// جستجوی محصولات
+export async function searchProducts(search: string): Promise<Product[]> {
+  const response = await api.get<Product[]>("/products", {
+    params: {
+      _limit: 100,
+    },
+  });
+
+  const searchText = search.trim().toLowerCase();
+
+  if (!searchText) {
+    return response.data.slice(0, 5);
+  }
+
+  return response.data
+    .filter((product) => {
+      const name = product.name.toLowerCase();
+      const brand = product.brand.toLowerCase();
+
+      return name.includes(searchText) || brand.includes(searchText);
+    })
+    .slice(0, 6);
 }

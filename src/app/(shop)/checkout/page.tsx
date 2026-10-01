@@ -78,7 +78,6 @@ export default function Checkout() {
   });
 
   // ارسال فرم
-  // ارسال فرم
   const handleSubmitForm = async (data: CheckoutFormValues) => {
     setSubmitError("");
 
