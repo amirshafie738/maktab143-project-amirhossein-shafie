@@ -17,9 +17,11 @@ export default function HomePage() {
 
       <CategorySection />
 
+      <CategoryProducts category="4" title="محصولات عطر" />
+
       <CategoryProducts category="2" title="محصولات مراقبت مو" />
 
-      <CategoryProducts category="4" title="محصولات عطر" />
+
 
       <Newsletter/>
     </main>

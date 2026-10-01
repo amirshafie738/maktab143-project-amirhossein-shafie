@@ -5,6 +5,7 @@ import ProductDetails from "@/components/shop/prodduct/ProductDetails";
 
 
 
+
 type ProductPageProps = {
   params: Promise<{
     id: string;

@@ -13,15 +13,28 @@ import {
 } from "react-icons/fi";
 
 import type { Product } from "@/types/product";
+
 import ProductSlider from "./ProductSlider";
+
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/redux/store";
+
+import { addToCart } from "@/redux/reducer/cartSlice";
+import { toggleFavorite } from "@/redux/reducer/favoriteSlice";
 
 type ProductCartProps = {
   product: Product;
 };
 
 export default function ProductCart({ product }: ProductCartProps) {
-  const [selectedImage, setSelectedImage] = useState(0);
+
   const [quantity, setQuantity] = useState(1);
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const isFavorite = useSelector((state: RootState) =>
+    state.favorite.items.some((item) => item.id === product.id)
+  );
 
   const images =
     product.image?.length > 0
@@ -50,10 +63,9 @@ export default function ProductCart({ product }: ProductCartProps) {
   return (
     <main className="bg-[#fcfaf7]">
       <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        {/* ================= کارت اصلی محصول ================= */}
+        {/* کارت اصلی محصول */}
         <div className="grid min-w-0 gap-10 lg:grid-cols-2 lg:gap-14">
-          {/* ================= گالری ================= */}
-          {/* ================= گالری ================= */}
+          {/* گالری */}
           <div className="min-w-0 w-full">
             <ProductSlider
               images={images}
@@ -62,7 +74,7 @@ export default function ProductCart({ product }: ProductCartProps) {
             />
           </div>
 
-          {/* ================= اطلاعات محصول ================= */}
+          {/* اطلاعات محصول */}
           <div className="min-w-0 flex flex-col justify-center text-right">
             {/* برند */}
             <div className="mb-4 flex items-center justify-start gap-3">
@@ -140,7 +152,7 @@ export default function ProductCart({ product }: ProductCartProps) {
               </span>
             </div>
 
-            {/* ================= خرید ================= */}
+            {/* خرید */}
             <div className="mt-7 rounded-[24px] border border-[#eee5dc] bg-white p-4 shadow-[0_8px_30px_rgba(70,45,30,0.04)] sm:p-5">
               <div className="flex w-full flex-col gap-3 sm:flex-row-reverse">
                 {/* تعداد */}
@@ -173,6 +185,14 @@ export default function ProductCart({ product }: ProductCartProps) {
                   type="button"
                   disabled={isOutOfStock}
                   className="flex h-13 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-[#7c243d] px-5 font-bold text-white shadow-[0_8px_20px_rgba(124,36,61,0.18)] transition duration-200 hover:bg-[#681f34] hover:shadow-[0_10px_25px_rgba(124,36,61,0.24)] disabled:cursor-not-allowed disabled:bg-[#ccc] disabled:shadow-none"
+                  onClick={() => {
+                    dispatch(
+                      addToCart({
+                        product,
+                        quantity,
+                      })
+                    );
+                  }}
                 >
                   <FiShoppingBag size={18} />
 
@@ -190,7 +210,7 @@ export default function ProductCart({ product }: ProductCartProps) {
               </div>
             </div>
 
-            {/* ================= ارسال رایگان ================= */}
+            {/* ارسال رایگان */}
             <div className="mt-4 flex items-center gap-3 rounded-[20px] border border-[#dce3d7] bg-[#f3f6f0] px-5 py-4 text-sm text-[#66705e]">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white">
                 <FiCheckCircle size={18} />
@@ -199,7 +219,7 @@ export default function ProductCart({ product }: ProductCartProps) {
               <span>این انتخاب، شما را به ارسال رایگان می‌رساند.</span>
             </div>
 
-            {/* ================= مزایا ================= */}
+            {/* مزایا */}
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <div className="flex items-center gap-3 rounded-[18px] border border-[#eee5dc] bg-white px-4 py-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f7f2eb] text-[#806d5b]">
@@ -230,20 +250,33 @@ export default function ProductCart({ product }: ProductCartProps) {
               </div>
             </div>
 
-            {/* ================= علاقه مندی / اشتراک گذاری ================= */}
+            {/* علاقه مندی / اشتراک گذاری */}
             <div className="mt-6 flex flex-wrap items-center justify-start gap-x-8 gap-y-4 border-t border-[#eee5dc] pt-5">
+              {/* علاقه مندی */}
               <button
                 type="button"
-                className="group flex items-center gap-2 text-sm font-bold text-[#444] transition hover:text-[#7c243d]"
+                onClick={() => {
+                  dispatch(toggleFavorite(product));
+                }}
+                className={`group flex items-center gap-2 text-sm font-bold transition ${
+                  isFavorite
+                    ? "text-red-500"
+                    : "text-[#444] hover:text-[#7c243d]"
+                }`}
               >
-                <span>ذخیره در علاقه‌مندی</span>
+                <span>
+                  {isFavorite ? "حذف از علاقه‌مندی" : "ذخیره در علاقه‌مندی"}
+                </span>
 
                 <FiHeart
                   size={19}
-                  className="transition-transform group-hover:scale-110"
+                  className={`transition-transform group-hover:scale-110 ${
+                    isFavorite ? "fill-current" : ""
+                  }`}
                 />
               </button>
 
+              {/* اشتراک گذاری */}
               <button
                 type="button"
                 className="group flex items-center gap-2 text-sm font-bold text-[#444] transition hover:text-[#7c243d]"

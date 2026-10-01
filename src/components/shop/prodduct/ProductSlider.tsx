@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 type ProductSliderProps = {
   images: string[];
@@ -28,23 +25,17 @@ export default function ProductSlider({
   }
 
   const nextImage = () => {
-    setCurrentIndex((prev) =>
-      prev === images.length - 1 ? 0 : prev + 1
-    );
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   const previousImage = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? images.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   return (
     <div className="w-full">
-
       {/* اسلایدر اصلی */}
       <div className="group relative overflow-hidden rounded-[28px] border border-[#eee8e2] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-
         {/* عکس */}
         <div className="aspect-square w-full bg-white">
           <img
