@@ -13,6 +13,9 @@ const vazirmatn = Vazirmatn({
 export const metadata: Metadata = {
   title: "فروشگاه اینترنتی",
   description: "فروشگاه اینترنتی",
+  icons:{
+    icon:"/images/brand/elvia.png"
+  }
 };
 
 export default function RootLayout({
