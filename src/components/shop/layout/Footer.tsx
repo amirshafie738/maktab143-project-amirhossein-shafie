@@ -26,13 +26,10 @@ export default function Footer() {
   return (
     <footer dir="rtl" className="mt-20 bg-[#f5eee5] text-[#6f6259]">
       {/* Main Footer */}
-      <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-10 py-12 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-10 py-12 md:grid-cols-2 lg:grid-cols-4">
         {/* Mahvara */}
         <div className="text-right">
-          <Link
-            href="/"
-            className="flex items-center justify-center"
-          >
+          <Link href="/" className="flex items-center justify-center">
             <div className="h-12  w-28 lg:h-20 lg:w-32 mb-5">
               <img
                 src="/images/brand/elvia-logo.png"
@@ -42,7 +39,7 @@ export default function Footer() {
             </div>
           </Link>
 
-          <p className="max-w-[390px] text-[15px] leading-8">
+          <p className="max-w-97.5 text-[15px] leading-8">
             انتخاب روشن برای زیبایی روزمره؛ محصولات معتبر، اطلاعات شفاف و تجربه
             خریدی آرام.
           </p>
@@ -109,7 +106,7 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="border-t border-[#ddd3c9]">
-        <div className="mx-auto flex max-w-[1440px] flex-col-reverse gap-4 px-10 py-5 text-sm md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-360 flex-col-reverse gap-4 px-10 py-5 text-sm md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2">
             <span>© ۱۴۰۵ الویا — نسخه نمایشی حرفه‌ای، همه حقوق محفوظ است.</span>
           </div>

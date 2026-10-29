@@ -130,25 +130,27 @@ export async function decreaseProductQuantity(
   return response.data;
 }
 // جستجوی محصولات
-export async function searchProducts(search: string): Promise<Product[]> {
+export async function searchProducts(
+  search: string
+): Promise<Product[]> {
+  const searchText = search.trim();
+
+  if (!searchText) {
+    const response = await api.get<Product[]>("/products", {
+      params: {
+        _limit: 5,
+      },
+    });
+
+    return response.data;
+  }
+
   const response = await api.get<Product[]>("/products", {
     params: {
-      _limit: 100,
+      q: searchText,
+      _limit: 6,
     },
   });
 
-  const searchText = search.trim().toLowerCase();
-
-  if (!searchText) {
-    return response.data.slice(0, 5);
-  }
-
-  return response.data
-    .filter((product) => {
-      const name = product.name.toLowerCase();
-      const brand = product.brand.toLowerCase();
-
-      return name.includes(searchText) || brand.includes(searchText);
-    })
-    .slice(0, 6);
+  return response.data;
 }

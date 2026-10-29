@@ -1,9 +1,11 @@
+
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FiFilter } from "react-icons/fi";
-import { useSearchParams,useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import CategoryFilterModal from "@/components/shop/products/CategoryFilterModal";
 import ProductList from "@/components/shop/products/ProductList";
@@ -20,160 +22,235 @@ type ProductFilters = {
   inStock: boolean;
   minRating: string;
 };
-const FILTER_STORAGE_KEY = "shop-filters";
 
-type SavedFilterState = {
-  filters: ProductFilters;
+const EMPTY_FILTERS: ProductFilters = {
+  category: "",
+  brand: "",
+  search: "",
+  minPrice: "",
+  maxPrice: "",
+  inStock: false,
+  minRating: "",
 };
+
+const DEFAULT_SORT = "newest";
+const PRODUCTS_PER_PAGE = 9;
+
 export default function ProductsPage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // خواندن تمام فیلترهای اعمال‌شده از URL
   const categoryFromUrl = searchParams.get("category") ?? "";
+  const brandFromUrl = searchParams.get("brand") ?? "";
+  const searchFromUrl = searchParams.get("search") ?? "";
+  const minPriceFromUrl = searchParams.get("minPrice") ?? "";
+  const maxPriceFromUrl = searchParams.get("maxPrice") ?? "";
+  const minRatingFromUrl = searchParams.get("minRating") ?? "";
+  const inStockFromUrl = searchParams.get("inStock") === "true";
 
-  const isFirstCategoryRender = useRef(true);
+  // شماره صفحه از URL
+  const requestedPage = Number(searchParams.get("page"));
+  const page =
+    Number.isInteger(requestedPage) && requestedPage > 0
+      ? requestedPage
+      : 1;
 
-  // وضعیت فیلتر موبایل
+  // مرتب‌سازی از URL
+  const allowedSorts = [
+    "newest",
+    "oldest",
+    "price-asc",
+    "price-desc",
+  ];
+
+  const requestedSort = searchParams.get("sort");
+
+  const sort =
+    requestedSort && allowedSorts.includes(requestedSort)
+      ? requestedSort
+      : DEFAULT_SORT;
+
+  // وضعیت باز بودن فیلتر موبایل
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // شماره صفحه
-  const [page, setPage] = useState(1);
-
-  // تعداد محصول در هر صفحه
-  const limit = 9;
-
-  // sort
-  const [sort, setSort] = useState("");
-
-  // دسته‌بندی و برند انتخاب‌شده
+  // مقادیر موقتی فرم فیلترها
   const [filters, setFilters] = useState<ProductFilters>({
+    ...EMPTY_FILTERS,
     category: categoryFromUrl,
-    brand: "",
-    search: "",
-    minPrice: "",
-    maxPrice: "",
-    minRating: "",
-    inStock: false,
+    brand: brandFromUrl,
+    search: searchFromUrl,
+    minPrice: minPriceFromUrl,
+    maxPrice: maxPriceFromUrl,
+    minRating: minRatingFromUrl,
+    inStock: inStockFromUrl,
   });
-  const [appliedFilters, setAppliedFilters] = useState<ProductFilters>({
-    category: categoryFromUrl,
-    brand: "",
-    search: "",
-    minPrice: "",
-    maxPrice: "",
-    minRating: "",
-    inStock: false,
-  });
-  //فیلترهای ذخیره‌شده در LocalStorage را برمی‌گرداند.
-  useEffect(() => {
-    const savedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
-  
-    if (!savedFilters) return;
-  
-    try {
-      const parsed: SavedFilterState = JSON.parse(savedFilters);
-  
-      const restoredFilters: ProductFilters = {
-        ...parsed.filters,
-        category: categoryFromUrl || parsed.filters.category,
-      };
-  
-      setFilters(restoredFilters);
-      setAppliedFilters(restoredFilters);
-    } catch (error) {
-      console.error("خطا در خواندن فیلترها:", error);
-  
-      localStorage.removeItem(FILTER_STORAGE_KEY);
-    }
-  }, []);
 
-  //وقتی category داخل URL تغییر کرد، state را با URL هماهنگ می‌کند.
-
+  // هماهنگ کردن فرم با URL
+  // این بخش هنگام باز کردن لینک یا استفاده از Back و Forward اجرا می‌شود.
   useEffect(() => {
-    if (isFirstCategoryRender.current) {
-      isFirstCategoryRender.current = false;
-      return;
-    }
-  
-    const newFilters: ProductFilters = {
+    setFilters({
       category: categoryFromUrl,
-      brand: "",
-      search: "",
-      minPrice: "",
-      maxPrice: "",
-      minRating: "",
-      inStock: false,
-    };
-  
-    setFilters(newFilters);
-    setAppliedFilters(newFilters);
-    setPage(1);
-  
-    // فیلتر جدید را در LocalStorage هم ذخیره کن
-    localStorage.setItem(
-      FILTER_STORAGE_KEY,
-      JSON.stringify({
-        filters: newFilters,
-      })
-    );
-  }, [categoryFromUrl]);
+      brand: brandFromUrl,
+      search: searchFromUrl,
+      minPrice: minPriceFromUrl,
+      maxPrice: maxPriceFromUrl,
+      minRating: minRatingFromUrl,
+      inStock: inStockFromUrl,
+    });
+  }, [
+    categoryFromUrl,
+    brandFromUrl,
+    searchFromUrl,
+    minPriceFromUrl,
+    maxPriceFromUrl,
+    minRatingFromUrl,
+    inStockFromUrl,
+  ]);
 
-  // تابع حذف فیلتر ها
-  const handleClearFilters = () => {
-    const emptyFilters: ProductFilters = {
-      category: "",
-      brand: "",
-      search: "",
-      minPrice: "",
-      maxPrice: "",
-      minRating: "",
-      inStock: false,
-    };
+  // ساخت URL از روی فیلترها
+  const buildProductsUrl = (params: URLSearchParams) => {
+    const query = params.toString();
 
-    setFilters(emptyFilters);
-    setAppliedFilters(emptyFilters);
-    setSort("newest");
-    setPage(1);
-
-    localStorage.removeItem(FILTER_STORAGE_KEY);
+    return query ? `/products?${query}` : "/products";
   };
-  // دریافت محصولات
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["shop-products", page, appliedFilters, sort],
 
+  // اعمال تمام فیلترها
+  const handleApplyFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    const filterParams: Record<string, string> = {
+      category: filters.category,
+      brand: filters.brand,
+      search: filters.search.trim(),
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      minRating: filters.minRating,
+    };
+
+    Object.entries(filterParams).forEach(([key, value]) => {
+      if (value.trim() === "") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    // فقط در صورت فعال بودن فیلتر موجودی، پارامتر را نگه می‌داریم.
+    if (filters.inStock) {
+      params.set("inStock", "true");
+    } else {
+      params.delete("inStock");
+    }
+
+    // بعد از تغییر فیلتر، صفحه اول نمایش داده شود.
+    params.delete("page");
+
+    router.push(buildProductsUrl(params));
+    setIsFilterOpen(false);
+  };
+
+  // پاک کردن فیلترها، مرتب‌سازی و صفحه‌بندی
+  const handleClearFilters = () => {
+    setFilters({ ...EMPTY_FILTERS });
+    setIsFilterOpen(false);
+
+    router.push("/products");
+  };
+
+  // تغییر صفحه بدون از دست دادن فیلترهای دیگر
+  const setPage: Dispatch<SetStateAction<number>> = (value) => {
+    const nextPage =
+      typeof value === "function" ? value(page) : value;
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (nextPage <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(nextPage));
+    }
+
+    router.push(buildProductsUrl(params));
+  };
+
+  // تغییر مرتب‌سازی بدون از دست دادن فیلترها
+  const handleSortChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (value === DEFAULT_SORT) {
+      params.delete("sort");
+    } else {
+      params.set("sort", value);
+    }
+
+    // پس از تغییر مرتب‌سازی به صفحه اول برمی‌گردیم.
+    params.delete("page");
+
+    router.push(buildProductsUrl(params));
+  };
+
+  // فیلترهای نهایی همیشه از URL خوانده می‌شوند.
+  const appliedFilters: ProductFilters = {
+    category: categoryFromUrl,
+    brand: brandFromUrl,
+    search: searchFromUrl,
+    minPrice: minPriceFromUrl,
+    maxPrice: maxPriceFromUrl,
+    minRating: minRatingFromUrl,
+    inStock: inStockFromUrl,
+  };
+
+  // دریافت محصولات با استفاده از پارامترهای URL
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: [
+      "shop-products",
+      page,
+      PRODUCTS_PER_PAGE,
+      appliedFilters,
+      sort,
+    ],
     queryFn: () =>
       getFilteredProducts({
         page,
-        limit,
+        limit: PRODUCTS_PER_PAGE,
         ...appliedFilters,
         sort,
       }),
   });
-  const products = data?.data ?? [];
 
-  // تعداد صفحات
-  const totalPages = Math.ceil((data?.total ?? 0) / limit);
+  const products = data?.data ?? [];
+  const totalProducts = data?.total ?? 0;
+
+  const totalPages = Math.ceil(
+    totalProducts / PRODUCTS_PER_PAGE
+  );
 
   return (
     <main className="min-h-screen bg-[#fcfaf8]">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {/* عنوان صفحه */}
-        <div className="mb-14 flex items-center justify-between">
+        <div className="mb-14 flex items-center justify-between gap-4">
           <div className="flex flex-col gap-4">
             <h1 className="text-3xl font-bold text-[#292929]">
               انتخاب‌های دقیق برای روتین شما
             </h1>
 
             <span className="mt-1 block text-base text-gray-500">
-              میان محصولات مراقبت پوست، آرایش، مو و عطر جست‌وجو کنید و با
-              فیلترهای کاربردی به انتخاب مناسب
+              میان محصولات مراقبت پوست، آرایش، مو و عطر جست‌وجو کنید
+              و با فیلترهای کاربردی به انتخاب مناسب برسید.
             </span>
           </div>
 
-          {/* فیلتر موبایل */}
+          {/* دکمه فیلتر موبایل */}
           <button
             type="button"
             onClick={() => setIsFilterOpen(true)}
-            className="flex h-10 items-center gap-2 rounded-xl border border-[#decfc7] bg-white px-4 text-sm font-semibold text-[#292929] lg:hidden"
+            className="flex h-10 shrink-0 items-center gap-2 rounded-xl border border-[#decfc7] bg-white px-4 text-sm font-semibold text-[#292929] lg:hidden"
           >
             <FiFilter className="text-[#7c243d]" />
             فیلترها
@@ -182,7 +259,7 @@ export default function ProductsPage() {
 
         {/* محتوای صفحه */}
         <div className="flex items-start gap-6">
-          {/* Sidebar */}
+          {/* سایدبار دسکتاپ */}
           <div className="hidden lg:block">
             <CategorySidebar
               filters={filters}
@@ -228,43 +305,34 @@ export default function ProductsPage() {
                   minRating,
                 }))
               }
-              onApply={() => {
-                setPage(1);
-                setAppliedFilters(filters);
-              
-                localStorage.setItem(
-                  FILTER_STORAGE_KEY,
-                  JSON.stringify({
-                    filters,
-                  })
-                );
-              
-                if (filters.category) {
-                  router.push(`/products?category=${filters.category}`);
-                } else {
-                  router.push("/products");
-                }
-              }}
+              onApply={handleApplyFilters}
               onClear={handleClearFilters}
             />
           </div>
 
-          {/* محصولات */}
+          {/* فهرست محصولات */}
           <section className="min-w-0 flex-1">
-            {/* تعداد و مرتب‌سازی */}
-            <div className="mb-6 flex items-center justify-between">
+            {/* تعداد محصولات و مرتب‌سازی */}
+            <div className="mb-6 flex items-center justify-between gap-3">
               <span className="text-sm text-gray-500">
-                {(data?.total ?? 0).toLocaleString("fa-IR")} محصول
+                {totalProducts.toLocaleString("fa-IR")} محصول
               </span>
 
               <div className="flex items-center gap-2">
-                <span className="hidden text-sm font-semibold sm:block">
+                <label
+                  htmlFor="product-sort"
+                  className="hidden text-sm font-semibold sm:block"
+                >
                   مرتب‌سازی:
-                </span>
+                </label>
 
                 <select
+                  id="product-sort"
                   value={sort}
-                  onChange={(event) => setSort(event.target.value)}
+                  onChange={(event) =>
+                    handleSortChange(event.target.value)
+                  }
+                  className="h-10 rounded-xl border border-[#decfc7] bg-white px-3 text-sm outline-none focus:border-[#7c243d]"
                 >
                   <option value="newest">جدیدترین</option>
                   <option value="oldest">قدیمی‌ترین</option>
@@ -274,14 +342,14 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* وضعیت دریافت */}
+            {/* وضعیت دریافت محصولات */}
             {isLoading && (
               <div className="py-20 text-center text-gray-500">
                 در حال دریافت محصولات...
               </div>
             )}
 
-            {/* خطا */}
+            {/* خطای دریافت محصولات */}
             {isError && (
               <div className="py-20 text-center text-red-500">
                 دریافت محصولات با خطا مواجه شد.
@@ -289,7 +357,9 @@ export default function ProductsPage() {
             )}
 
             {/* لیست محصولات */}
-            {!isLoading && !isError && <ProductList products={products} />}
+            {!isLoading && !isError && (
+              <ProductList products={products} />
+            )}
 
             {/* صفحه‌بندی */}
             {!isLoading && !isError && totalPages > 1 && (
@@ -303,49 +373,54 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* فیلتر موبایل */}
+      {/* مودال فیلتر موبایل */}
       <CategoryFilterModal
         open={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         filters={filters}
-        onCategoryChange={(value) =>
-          setFilters((prev) => ({ ...prev, category: value }))
+        onCategoryChange={(category) =>
+          setFilters((prev) => ({
+            ...prev,
+            category,
+          }))
         }
-        onBrandChange={(value) =>
-          setFilters((prev) => ({ ...prev, brand: value }))
+        onBrandChange={(brand) =>
+          setFilters((prev) => ({
+            ...prev,
+            brand,
+          }))
         }
-        onSearchChange={(value) =>
-          setFilters((prev) => ({ ...prev, search: value }))
+        onSearchChange={(search) =>
+          setFilters((prev) => ({
+            ...prev,
+            search,
+          }))
         }
-        onMinPriceChange={(value) =>
-          setFilters((prev) => ({ ...prev, minPrice: value }))
+        onMinPriceChange={(minPrice) =>
+          setFilters((prev) => ({
+            ...prev,
+            minPrice,
+          }))
         }
-        onMaxPriceChange={(value) =>
-          setFilters((prev) => ({ ...prev, maxPrice: value }))
+        onMaxPriceChange={(maxPrice) =>
+          setFilters((prev) => ({
+            ...prev,
+            maxPrice,
+          }))
         }
-        onRatingChange={(value) =>
-          setFilters((prev) => ({ ...prev, minRating: value }))
+        onRatingChange={(minRating) =>
+          setFilters((prev) => ({
+            ...prev,
+            minRating,
+          }))
         }
-        onInStockChange={(value) =>
-          setFilters((prev) => ({ ...prev, inStock: value }))
+        onInStockChange={(inStock) =>
+          setFilters((prev) => ({
+            ...prev,
+            inStock,
+          }))
         }
-        onApply={() => {
-          setPage(1);
-          setAppliedFilters(filters);
-        
-          localStorage.setItem(
-            FILTER_STORAGE_KEY,
-            JSON.stringify({
-              filters,
-            })
-          );
-        
-          if (filters.category) {
-            router.push(`/products?category=${filters.category}`);
-          } else {
-            router.push("/products");
-          }
-        }}
+        onApply={handleApplyFilters}
         onClear={handleClearFilters}
       />
     </main>
