@@ -1,36 +1,65 @@
+
 const jsonServer = require("json-server");
 const cors = require("cors");
-const server = jsonServer.create();
-const router = jsonServer.router("db.json");
-const middlewares = jsonServer.defaults({ noCors: true });
+const dotenv = require("dotenv");
 
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
-
 const jwt = require("jsonwebtoken");
 
-const AUTH_JWT_SECRET = "TOP-SECRET";
-const AUTH_JWT_REFRESH_TOKEN_SECRET = "REFRESH_TOKEN_TOP-SECRET";
+// ----------------------------------------------------
+// Environment Variables
+// ----------------------------------------------------
 
-const AUTH_JWT_OPTIONS = { expiresIn: 60 * 60 };
+dotenv.config();
+
+const AUTH_JWT_SECRET = process.env.AUTH_JWT_SECRET;
+const AUTH_JWT_REFRESH_TOKEN_SECRET =
+  process.env.AUTH_JWT_REFRESH_TOKEN_SECRET;
+
+if (!AUTH_JWT_SECRET || !AUTH_JWT_REFRESH_TOKEN_SECRET) {
+  throw new Error("JWT secrets are not configured");
+}
+
+// ----------------------------------------------------
+// Server Setup
+// ----------------------------------------------------
+
+const server = jsonServer.create();
+
+const dbPath = path.join(__dirname, "db.json");
+const router = jsonServer.router(dbPath);
+
+const middlewares = jsonServer.defaults({
+  noCors: true,
+});
+
+// ----------------------------------------------------
+// Upload Setup
+// ----------------------------------------------------
+
+const uploadPath = path.join(__dirname, "uploads");
+
+fs.mkdirSync(uploadPath, { recursive: true });
+
+const upload = multer({
+  dest: uploadPath,
+});
+
+// ----------------------------------------------------
+// JWT Settings
+// ----------------------------------------------------
+
 const refreshTokenExpire = "1d";
 const accessTokenExpire = "1h";
-
-// TODO: vaghti token nis, 200 mide
-// TODO: vaghti token nist, invalid nade (login api)
-// TODO: besorat pishfarz token baraye har api niaz nabashe
-// vali baraye ye seri api niaz bash be sorat dasti set she
-// TODO: Handle 404 error message
-// TODO: Refactor refresh token mechanism
 
 // ----------------------------------------------------
 // Load DB file for Authentication
 // ----------------------------------------------------
 
 const DB = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "./db.json"), "utf-8")
+  fs.readFileSync(dbPath, "utf-8")
 );
 
 // ----------------------------------------------------
@@ -88,7 +117,8 @@ server.use((req, res, next) => {
     }
 
     const authorized =
-      protectionRule === true || protectionRule === decoded.role;
+      protectionRule === true ||
+      protectionRule === decoded.role;
 
     if (!authorized) {
       return res.status(401).send();
@@ -107,41 +137,47 @@ server.use(middlewares);
 // ----------------------------------------------------
 // Upload API
 // ----------------------------------------------------
-// فقط thumbnail را قبول می‌کند
 
-server.post("/upload", upload.single("thumbnail"), function (req, res) {
-  if (!req.file) {
-    return res.status(400).json({
-      message: "No thumbnail uploaded",
+server.post(
+  "/upload",
+  upload.single("thumbnail"),
+  function (req, res) {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No thumbnail uploaded",
+      });
+    }
+
+    const {
+      mimetype,
+      size,
+      filename,
+      originalname,
+    } = req.file;
+
+    if (mimetype !== "image/jpeg") {
+      return res.status(400).json({
+        message: "image should be in image/jpeg type",
+      });
+    }
+
+    if (size > 2 * 1024 * 1024) {
+      return res.status(400).json({
+        message: "image size should be less than 2MB",
+      });
+    }
+
+    res.json({
+      fieldname: "thumbnail",
+      originalname,
+      filename,
+      path: "/files/" + filename,
     });
   }
-
-  const { mimetype, size, filename, originalname } = req.file;
-
-  // فقط JPEG
-  if (mimetype !== "image/jpeg") {
-    return res.status(400).json({
-      message: "image should be in image/jpeg type",
-    });
-  }
-
-  // حداکثر 2MB
-  if (size > 2 * 1024 * 1024) {
-    return res.status(400).json({
-      message: "image size should be less than 2MB",
-    });
-  }
-
-  res.json({
-    fieldname: "thumbnail",
-    originalname,
-    filename,
-    path: "/files/" + filename,
-  });
-});
+);
 
 // ----------------------------------------------------
-// multi images
+// Multi Images
 // ----------------------------------------------------
 
 server.post(
@@ -162,12 +198,13 @@ server.post(
     res.json(images);
   }
 );
+
 // ----------------------------------------------------
 // List All Files
 // ----------------------------------------------------
 
 server.get("/files", (req, res, next) => {
-  fs.readdir("./uploads/", (err, files) => {
+  fs.readdir(uploadPath, (err, files) => {
     if (err) {
       return next(err);
     }
@@ -183,7 +220,15 @@ server.get("/files", (req, res, next) => {
 server.get("/files/:file_id", (req, res) => {
   const { file_id } = req.params;
 
-  const filePath = path.join(__dirname, "uploads", file_id);
+  // جلوگیری از دسترسی به مسیرهای خارج از uploads
+  if (
+    file_id !== path.basename(file_id) ||
+    file_id.includes("..")
+  ) {
+    return res.status(400).send("Invalid file name");
+  }
+
+  const filePath = path.join(uploadPath, file_id);
 
   if (!fs.existsSync(filePath)) {
     return res.status(404).send("File not found");
@@ -203,12 +248,13 @@ server.use(jsonServer.bodyParser);
 // ----------------------------------------------------
 // Upload Middleware for POST / PATCH
 // ----------------------------------------------------
-// فقط فیلد thumbnail می‌تواند فایل داشته باشد
 
-const thumbnailUploadMiddleware = upload.single("thumbnail");
+const thumbnailUploadMiddleware =
+  upload.single("thumbnail");
 
 server.use((req, res, next) => {
-  const contentType = req.headers["content-type"] || "";
+  const contentType =
+    req.headers["content-type"] || "";
 
   if (
     (req.method === "POST" || req.method === "PATCH") &&
@@ -226,23 +272,24 @@ server.use((req, res, next) => {
 
 server.use((req, res, next) => {
   if (req.file) {
-    const { mimetype, size, filename } = req.file;
+    const {
+      mimetype,
+      size,
+      filename,
+    } = req.file;
 
-    // فقط JPEG
     if (mimetype !== "image/jpeg") {
       return res.status(400).json({
         message: "image should be in image/jpeg type",
       });
     }
 
-    // حداکثر 2MB
     if (size > 2 * 1024 * 1024) {
       return res.status(400).json({
         message: "image size should be less than 2MB",
       });
     }
 
-    // ذخیره مسیر داخل thumbnail
     req.body.thumbnail = "/files/" + filename;
   }
 
@@ -275,11 +322,15 @@ server.post("/auth/login", async function (req, res) {
   const { username, password } = req.body;
 
   req.user = (DB.users || []).find(
-    (u) => u.username == username && u.password == password
+    (u) =>
+      u.username == username &&
+      u.password == password
   );
 
   if (!req.user) {
-    return res.status(401).send("No user with those credentials!");
+    return res
+      .status(401)
+      .send("No user with those credentials!");
   }
 
   const {
@@ -319,6 +370,7 @@ server.post("/auth/login", async function (req, res) {
     refreshToken,
   });
 });
+
 // ----------------------------------------------------
 // Verify Access Token
 // ----------------------------------------------------
@@ -352,69 +404,80 @@ server.get("/auth/verify", (req, res) => {
     });
   }
 });
+
 // ----------------------------------------------------
 // Refresh Token
 // ----------------------------------------------------
 
-server.post("/auth/refresh-token", async function (req, res) {
-  const refreshToken = req.header("refreshToken");
+server.post(
+  "/auth/refresh-token",
+  async function (req, res) {
+    const refreshToken =
+      req.header("refreshToken");
 
-  if (!refreshToken) {
-    return res.status(403).json({
-      errors: [
-        {
-          msg: "Token not found",
-        },
-      ],
-    });
-  }
+    if (!refreshToken) {
+      return res.status(403).json({
+        errors: [
+          {
+            msg: "Token not found",
+          },
+        ],
+      });
+    }
 
-  if (!refreshTokens.includes(refreshToken)) {
-    return res.status(403).json({
-      errors: [
-        {
-          msg: "Invalid refresh token",
-        },
-      ],
-    });
-  }
+    if (!refreshTokens.includes(refreshToken)) {
+      return res.status(403).json({
+        errors: [
+          {
+            msg: "Invalid refresh token",
+          },
+        ],
+      });
+    }
 
-  try {
-    const user = await jwt.verify(
-      refreshToken,
-      AUTH_JWT_REFRESH_TOKEN_SECRET
-    );
+    try {
+      const user = await jwt.verify(
+        refreshToken,
+        AUTH_JWT_REFRESH_TOKEN_SECRET
+      );
 
-    const { dbUsername, name, role } = user;
-
-    const accessToken = await jwt.sign(
-      {
+      const {
         dbUsername,
         name,
         role,
-      },
-      AUTH_JWT_SECRET,
-      {
-        expiresIn: accessTokenExpire,
-      }
-    );
+      } = user;
 
-    res.json({
-      accessToken,
-    });
-  } catch (error) {
-    res.status(403).json({
-      errors: [
+      const accessToken = await jwt.sign(
         {
-          msg: "Invalid token",
+          dbUsername,
+          name,
+          role,
         },
-      ],
-    });
+        AUTH_JWT_SECRET,
+        {
+          expiresIn: accessTokenExpire,
+        }
+      );
+
+      res.json({
+        accessToken,
+      });
+    } catch (error) {
+      res.status(403).json({
+        errors: [
+          {
+            msg: "Invalid token",
+          },
+        ],
+      });
+    }
   }
-});
+);
 
+// ----------------------------------------------------
+// Dashboard Stats
+// ----------------------------------------------------
 
-// آمار داشبورد
 server.get("/admin/dashboard/stats", (req, res) => {
   const orders = router.db.get("orders").value();
   const products = router.db.get("products").value();
@@ -429,7 +492,6 @@ server.get("/admin/dashboard/stats", (req, res) => {
   );
 
   const totalOrders = successfulOrders.length;
-
   const totalProducts = products.length;
 
   const outOfStockProducts = products.filter(
@@ -444,7 +506,10 @@ server.get("/admin/dashboard/stats", (req, res) => {
   });
 });
 
-// فروش روزانه
+// ----------------------------------------------------
+// Daily Sales
+// ----------------------------------------------------
+
 server.get("/admin/dashboard/sales", (req, res) => {
   const orders = router.db.get("orders").value();
 
@@ -475,98 +540,124 @@ server.get("/admin/dashboard/sales", (req, res) => {
 
   res.json(sales);
 });
-// وضعیت سفارش‌ها
-server.get("/admin/dashboard/order-status", (req, res) => {
-  const orders = router.db.get("orders").value();
 
-  const successful = orders.filter(
-    (order) => order.paymentStatus === "success"
-  );
+// ----------------------------------------------------
+// Order Status
+// ----------------------------------------------------
 
-  const delivered = successful.filter(
-    (order) => order.delivered === true
-  ).length;
+server.get(
+  "/admin/dashboard/order-status",
+  (req, res) => {
+    const orders = router.db.get("orders").value();
 
-  const notDelivered = successful.filter(
-    (order) => order.delivered === false
-  ).length;
+    const successful = orders.filter(
+      (order) => order.paymentStatus === "success"
+    );
 
-  res.json([
-    {
-      status: "تحویل شده",
-      count: delivered,
-    },
-    {
-      status: "در انتظار ارسال",
-      count: notDelivered,
-    },
-  ]);
-});
+    const delivered = successful.filter(
+      (order) => order.delivered === true
+    ).length;
 
-// محصولات کم‌موجودی
-server.get("/admin/dashboard/low-stock", (req, res) => {
-  const products = router.db.get("products").value();
+    const notDelivered = successful.filter(
+      (order) => order.delivered === false
+    ).length;
 
-  const lowStockProducts = products
-    .filter((product) => product.quantity > 0 && product.quantity <= 5)
-    .sort((a, b) => a.quantity - b.quantity)
-    .slice(0, 5);
+    res.json([
+      {
+        status: "تحویل شده",
+        count: delivered,
+      },
+      {
+        status: "در انتظار ارسال",
+        count: notDelivered,
+      },
+    ]);
+  }
+);
 
-  res.json(lowStockProducts);
-});
+// ----------------------------------------------------
+// Low Stock Products
+// ----------------------------------------------------
 
-// پرفروش‌ترین محصولات
-server.get("/admin/dashboard/top-products", (req, res) => {
-  const orders = router.db.get("orders").value();
-  const products = router.db.get("products").value();
+server.get(
+  "/admin/dashboard/low-stock",
+  (req, res) => {
+    const products = router.db.get("products").value();
 
-  const successfulOrders = orders.filter(
-    (order) => order.paymentStatus === "success"
-  );
+    const lowStockProducts = products
+      .filter(
+        (product) =>
+          product.quantity > 0 &&
+          product.quantity <= 5
+      )
+      .sort((a, b) => a.quantity - b.quantity)
+      .slice(0, 5);
 
-  const productSales = {};
+    res.json(lowStockProducts);
+  }
+);
 
-  successfulOrders.forEach((order) => {
-    order.products.forEach((item) => {
-      const id = Number(item.id);
-      const count = Number(item.count);
+// ----------------------------------------------------
+// Top Products
+// ----------------------------------------------------
 
-      if (!productSales[id]) {
-        productSales[id] = 0;
-      }
+server.get(
+  "/admin/dashboard/top-products",
+  (req, res) => {
+    const orders = router.db.get("orders").value();
+    const products = router.db.get("products").value();
 
-      productSales[id] += count;
+    const successfulOrders = orders.filter(
+      (order) => order.paymentStatus === "success"
+    );
+
+    const productSales = {};
+
+    successfulOrders.forEach((order) => {
+      order.products.forEach((item) => {
+        const id = Number(item.id);
+        const count = Number(item.count);
+
+        if (!productSales[id]) {
+          productSales[id] = 0;
+        }
+
+        productSales[id] += count;
+      });
     });
-  });
 
-  const topProducts = Object.entries(productSales)
-    .map(([id, soldCount]) => {
-      const product = products.find(
-        (product) => product.id === Number(id)
-      );
+    const topProducts = Object.entries(productSales)
+      .map(([id, soldCount]) => {
+        const product = products.find(
+          (product) => product.id === Number(id)
+        );
 
-      if (!product) return null;
+        if (!product) return null;
 
-      return {
-        ...product,
-        soldCount,
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => b.soldCount - a.soldCount)
-    .slice(0, 5);
+        return {
+          ...product,
+          soldCount,
+        };
+      })
+      .filter(Boolean)
+      .sort(
+        (a, b) => b.soldCount - a.soldCount
+      )
+      .slice(0, 5);
 
-  res.json(topProducts);
-});
+    res.json(topProducts);
+  }
+);
+
 // ----------------------------------------------------
 // JSON Server Router
 // ----------------------------------------------------
 
 server.use(router);
 
-// حذف سفارش‌های pending منقضی‌شده
-
-const PENDING_ORDER_EXPIRE_TIME = 10 * 60 * 1000;
+// ----------------------------------------------------
+// Delete Expired Orders
+// ----------------------------------------------------
 
 const ORDER_EXPIRE_TIME = 10 * 60 * 1000;
 
@@ -597,8 +688,8 @@ setInterval(() => {
 // Start Server
 // ----------------------------------------------------
 
-server.listen(3001, () => {
-  console.log(
-    "Customized JSON-Server is running at http://localhost:3001/"
-  );
+const PORT = process.env.PORT || 3001;
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on port ${PORT}`);
 });
