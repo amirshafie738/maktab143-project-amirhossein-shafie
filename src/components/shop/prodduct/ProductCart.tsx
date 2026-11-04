@@ -21,13 +21,13 @@ import type { AppDispatch, RootState } from "@/redux/store";
 
 import { addToCart } from "@/redux/reducer/cartSlice";
 import { toggleFavorite } from "@/redux/reducer/favoriteSlice";
+import { getImageUrl } from "@/lib/imageUrl";
 
 type ProductCartProps = {
   product: Product;
 };
 
 export default function ProductCart({ product }: ProductCartProps) {
-
   const [quantity, setQuantity] = useState(1);
 
   const dispatch = useDispatch<AppDispatch>();
@@ -42,9 +42,6 @@ export default function ProductCart({ product }: ProductCartProps) {
       : product.thumbnail
       ? [product.thumbnail]
       : [];
-
-  const imageUrl = (image: string) =>
-    image.startsWith("/files/") ? `http://localhost:3001${image}` : image;
 
   const isOutOfStock = product.quantity === 0;
 
@@ -70,7 +67,7 @@ export default function ProductCart({ product }: ProductCartProps) {
             <ProductSlider
               images={images}
               productName={product.name}
-              imageUrl={imageUrl}
+              imageUrl={getImageUrl}
             />
           </div>
 

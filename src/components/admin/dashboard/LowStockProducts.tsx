@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { getDashboardLowStock } from "@/api/dashboard";
+import { getImageUrl } from "@/lib/imageUrl";
 
 export default function LowStockProducts() {
   const { data = [], isLoading } = useQuery({
@@ -21,12 +22,9 @@ export default function LowStockProducts() {
 
   return (
     <div className="rounded-xl border bg-white p-5">
-
       {/* عنوان */}
       <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-lg font-bold">
-          محصولات کم‌موجودی
-        </h2>
+        <h2 className="text-lg font-bold">محصولات کم‌موجودی</h2>
 
         <Link
           href="/admin/inventory"
@@ -44,9 +42,7 @@ export default function LowStockProducts() {
       ) : (
         <div className="space-y-4">
           {data.map((product) => {
-            const imageUrl = product.thumbnail.startsWith("/files/")
-              ? `http://localhost:3001${product.thumbnail}`
-              : product.thumbnail;
+            const imageUrl = getImageUrl(product.thumbnail);
 
             return (
               <div
@@ -62,20 +58,14 @@ export default function LowStockProducts() {
 
                 {/* اطلاعات */}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {product.name}
-                  </p>
+                  <p className="truncate text-sm font-medium">{product.name}</p>
 
-                  <p className="mt-1 text-xs text-gray-500">
-                    {product.brand}
-                  </p>
+                  <p className="mt-1 text-xs text-gray-500">{product.brand}</p>
                 </div>
 
                 {/* موجودی */}
                 <div className="text-left">
-                  <p className="text-xs text-gray-500">
-                    موجودی
-                  </p>
+                  <p className="text-xs text-gray-500">موجودی</p>
 
                   <p className="mt-1 font-bold text-red-600">
                     {product.quantity.toLocaleString("fa-IR")}
@@ -86,7 +76,6 @@ export default function LowStockProducts() {
           })}
         </div>
       )}
-
     </div>
   );
 }

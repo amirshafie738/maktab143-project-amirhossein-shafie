@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { RootState } from "@/redux/store";
 import { searchProducts } from "@/api/product";
+import { getImageUrl } from "@/lib/imageUrl";
 
 const menuItems = [
   {
@@ -241,9 +242,7 @@ export default function Heder() {
               {!isSearching && searchResults.length > 0 && (
                 <div className="space-y-3">
                   {searchResults.map((product) => {
-                    const imageUrl = product.thumbnail.startsWith("/files/")
-                      ? `http://localhost:3001${product.thumbnail}`
-                      : product.thumbnail;
+                    const imageUrl = getImageUrl(product.thumbnail);
 
                     return (
                       <Link

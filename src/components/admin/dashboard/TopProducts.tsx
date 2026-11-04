@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getDashboardTopProducts } from "@/api/dashboard";
+import { getImageUrl } from "@/lib/imageUrl";
 
 export default function TopProducts() {
   const { data = [], isLoading } = useQuery({
@@ -20,16 +21,11 @@ export default function TopProducts() {
 
   return (
     <div className="rounded-xl border bg-white p-5">
-
       {/* عنوان */}
       <div className="mb-5">
-        <h2 className="text-lg font-bold">
-          پرفروش‌ترین محصولات
-        </h2>
+        <h2 className="text-lg font-bold">پرفروش‌ترین محصولات</h2>
 
-        <p className="mt-1 text-sm text-gray-500">
-          بر اساس تعداد فروش
-        </p>
+        <p className="mt-1 text-sm text-gray-500">بر اساس تعداد فروش</p>
       </div>
 
       {data.length === 0 ? (
@@ -39,9 +35,7 @@ export default function TopProducts() {
       ) : (
         <div className="space-y-4">
           {data.map((product, index) => {
-            const imageUrl = product.thumbnail.startsWith("/files/")
-              ? `http://localhost:3001${product.thumbnail}`
-              : product.thumbnail;
+            const imageUrl = getImageUrl(product.thumbnail);
 
             return (
               <div
@@ -62,20 +56,14 @@ export default function TopProducts() {
 
                 {/* اطلاعات */}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {product.name}
-                  </p>
+                  <p className="truncate text-sm font-medium">{product.name}</p>
 
-                  <p className="mt-1 text-xs text-gray-500">
-                    {product.brand}
-                  </p>
+                  <p className="mt-1 text-xs text-gray-500">{product.brand}</p>
                 </div>
 
                 {/* تعداد فروش */}
                 <div className="shrink-0 text-left">
-                  <p className="text-xs text-gray-500">
-                    فروش
-                  </p>
+                  <p className="text-xs text-gray-500">فروش</p>
 
                   <p className="mt-1 font-bold text-[#7d2945]">
                     {product.soldCount.toLocaleString("fa-IR")}

@@ -1,10 +1,9 @@
-import axios, {
-  type AxiosError,
-  type InternalAxiosRequestConfig,
-} from "axios";
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
+  baseURL: API_BASE_URL,
 });
 
 type RetryConfig = InternalAxiosRequestConfig & {
@@ -18,8 +17,7 @@ let refreshPromise: Promise<string> | null = null;
 // ================================
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const accessToken =
-      localStorage.getItem("accessToken");
+    const accessToken = localStorage.getItem("accessToken");
 
     if (accessToken) {
       config.headers.token = accessToken;
@@ -36,18 +34,14 @@ api.interceptors.response.use(
   (response) => response,
 
   async (error: AxiosError) => {
-    const originalRequest =
-      error.config as RetryConfig | undefined;
+    const originalRequest = error.config as RetryConfig | undefined;
 
     if (!originalRequest) {
       return Promise.reject(error);
     }
 
     // اگر 401 گرفتیم
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       // Axios فقط در مرورگر می‌تواند localStorage را بخواند
@@ -55,8 +49,7 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      const refreshToken =
-        localStorage.getItem("refreshToken");
+      const refreshToken = localStorage.getItem("refreshToken");
 
       // Refresh Token نداریم
       if (!refreshToken) {
@@ -77,7 +70,7 @@ api.interceptors.response.use(
         if (!refreshPromise) {
           refreshPromise = axios
             .post<{ accessToken: string }>(
-              "http://localhost:3001/auth/refresh-token",
+              `${API_BASE_URL}/auth/refresh-token`,
               {},
               {
                 headers: {
@@ -94,29 +87,22 @@ api.interceptors.response.use(
         }
 
         // منتظر Access Token جدید می‌مانیم
-        const newAccessToken =
-          await refreshPromise;
+        const newAccessToken = await refreshPromise;
 
         // ================================
         // ذخیره Access Token جدید
         // ================================
 
-        localStorage.setItem(
-          "accessToken",
-          newAccessToken
-        );
+        localStorage.setItem("accessToken", newAccessToken);
 
         // Cookie را هم آپدیت می‌کنیم
-        document.cookie =
-          `accessToken=${newAccessToken}; path=/`;
+        document.cookie = `accessToken=${newAccessToken}; path=/`;
 
         // Token جدید روی درخواست قبلی
-        originalRequest.headers.token =
-          newAccessToken;
+        originalRequest.headers.token = newAccessToken;
 
         // دوباره همان درخواست را بفرست
         return api(originalRequest);
-
       } catch (refreshError) {
         // Refresh Token هم معتبر نیست
 
@@ -129,8 +115,7 @@ api.interceptors.response.use(
         document.cookie =
           "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
-        window.location.href =
-          "/admin/login";
+        window.location.href = "/admin/login";
 
         return Promise.reject(refreshError);
       }
