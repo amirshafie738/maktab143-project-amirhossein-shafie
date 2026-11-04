@@ -8,6 +8,7 @@ import type { Product } from "@/types/product";
 import type { RootState } from "@/redux/store";
 
 import { toggleFavorite } from "@/redux/reducer/favoriteSlice";
+import { getImageUrl } from "@/lib/imageUrl";
 
 type ProductCardProps = {
   product: Product;
@@ -20,9 +21,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     state.favorite.items.some((item) => item.id === product.id)
   );
 
-  const imageUrl = product.thumbnail.startsWith("/files/")
-    ? `http://localhost:3001${product.thumbnail}`
-    : product.thumbnail;
+  const imageUrl = getImageUrl(product.thumbnail);
 
   const isOutOfStock = product.quantity === 0;
 

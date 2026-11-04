@@ -1,6 +1,7 @@
 import { FiEdit, FiEye, FiTrash2 } from "react-icons/fi";
 
 import type { Product } from "@/types/product";
+import { getImageUrl } from "@/lib/imageUrl";
 
 type ProductTableProps = {
   products: Product[];
@@ -43,7 +44,7 @@ export default function ProductTable({
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-100">
                     <img
-                      src={`http://localhost:3001${product.thumbnail}`}
+                       src={getImageUrl(product.thumbnail)}
                       alt={product.name}
                       className="h-full w-full object-cover"
                     />

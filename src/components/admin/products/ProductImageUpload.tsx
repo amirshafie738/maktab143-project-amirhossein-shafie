@@ -1,5 +1,6 @@
 "use client";
 
+import { getImageUrl } from "@/lib/imageUrl";
 import { useEffect, useState } from "react";
 
 type ProductImageUploadProps = {
@@ -83,11 +84,7 @@ export default function ProductImageUpload({
       {preview && (
         <div className="mt-3 h-32 w-32 overflow-hidden rounded-xl border border-slate-200">
           <img
-            src={
-              preview.startsWith("/files/")
-                ? `http://localhost:3001${preview}`
-                : preview
-            }
+            src={getImageUrl(preview)}
             alt="پیش‌نمایش محصول"
             className="h-full w-full object-cover"
           />

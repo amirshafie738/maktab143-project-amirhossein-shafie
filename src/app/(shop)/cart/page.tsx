@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import type { RootState } from "@/redux/store";
 import { removeFromCart, updateCartQuantity } from "@/redux/reducer/cartSlice";
+import { getImageUrl } from "@/lib/imageUrl";
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -46,9 +47,7 @@ export default function CartPage() {
           {cartItems.map((item) => {
             const { product, quantity } = item;
 
-            const imageUrl = product.thumbnail.startsWith("/files/")
-              ? `http://localhost:3001${product.thumbnail}`
-              : product.thumbnail;
+            const imageUrl = getImageUrl(product.thumbnail);
 
             return (
               <div
